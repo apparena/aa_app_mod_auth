@@ -1,0 +1,23 @@
+<% if(showSocialConnect !== '' && showMailConnect !== '') { %>
+<div class="heading"><%= _.t('social_connect_headline') %></div>
+<%
+}
+
+if(_.aa.env.device.type === 'mobile' && _.aa.env.browser.name === 'other' && _.aa.env.browser.platform === 'mac'){
+print(showMailConnect);
+} else {
+print(showSocialConnect);
+}
+
+if(showSocialConnect !== '' && showMailConnect !== '') {
+%>
+<div class="heading"><%= _.t('internal_login_headline') %></div>
+<%
+}
+
+if(_.aa.env.device.type === 'mobile' && _.aa.env.browser.name === 'other' && _.aa.env.browser.platform === 'mac'){
+print(showSocialConnect);
+} else {
+print(showMailConnect);
+}
+%>

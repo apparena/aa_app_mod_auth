@@ -1,0 +1,11 @@
+{
+    "name":         "aa_app_mod_auth",
+    "version":      "1.0.0",
+    "main":         "./js/main.js",
+    "dependencies": {
+        "aa_app_mod_facebook": "latest",
+        "aa_app_mod_twitter":  "latest",
+        "aa_app_mod_google":   "latest",
+        "aa_app_mod_logging":  "latest"
+    }
+}

@@ -1,0 +1,33 @@
+<div class="modal fade" id="<%= modal_id %>" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-header-wrapper">
+                    <% if(typeof show_close !== 'undefined' && show_close === true) { %>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <% }
+
+                    if(typeof headline !== 'undefined' && _(headline).isBlank() === false) { %>
+                    <h3><%= headline %></h3>
+                    <% } %>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="modal-body-wrapper">
+                    <!-- PUT YOU CONTENT HERE WITH JS -->
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <div class="modal-footer-wrapper">
+                    <% _.each(buttons, function(value, key) { if(_.isUndefined(value.data)) { value.data = ''; }
+
+                    if(value.btn_type === 'button') { %>
+                    <button type="<%- value.btn_type %>" class="btn <%- value.btn_class%>" id="<%- value.btn_id %>"
+                    <%= value.data %>><%= value.btn_text %></button><% } else { %>
+                    <a class="<%- value.btn_class%>" id="<%- value.btn_id %>" <%- value.data %>><%= value.btn_text %> </a><% } }); %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

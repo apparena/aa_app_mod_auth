@@ -1,0 +1,22 @@
+<div class="panel-social">
+    <div class="body">
+        <ul>
+            <% if(_.c('login_social_networks').indexOf('gplus') !== -1){%>
+            <li class="gpconnect">
+                <i class="icon-google-plus icon-<%= _.c('social_connect_iconsize') %>"></i>
+                <span class="caption"><%= _.t('gplus') %></span>
+            </li>
+            <% } if(_.c('login_social_networks').indexOf('twitter') !== -1){ %>
+            <li class="twconnect">
+                <i class="icon-twitter icon-<%= _.c('social_connect_iconsize') %>"></i>
+                <span class="caption"><%= _.t('twitter') %></span>
+            </li>
+            <% } if(_.c('login_social_networks').indexOf('fb') !== -1){ %>
+            <li class="fbconnect">
+                <i class="icon-facebook icon-<%= _.c('social_connect_iconsize') %>"></i>
+                <span class="caption"><%= _.t('facebook') %></span>
+            </li>
+            <% } %>
+        </ul>
+    </div>
+</div>
