@@ -403,7 +403,7 @@ define([
             _.each(required, function (value) {
                 //console.log(value);
                 //_.debug.info('check', value, typeof that.user_data_model.get(value), that.user_data_model.get(value));
-                if (_(that.user_data_model.get(value)).isBlank() || that.user_data_model.get(value) === 'false') {
+                if (_.isEmpty(that.user_data_model.get(value)) || that.user_data_model.get(value) === 'false') {
                     //_.debug.warn(value + ' is empty', typeof that.user_data_model.get(value), that.user_data_model.get(value));
                     that.return_value = false;
                 }

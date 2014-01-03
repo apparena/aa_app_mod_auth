@@ -7,7 +7,7 @@ define([
 
     return function () {
         var loginView = LoginView.init();
-        loginView.render().openModal();
+        loginView.render().renderModal();
         $('#comment-box').hide();
         loginView.modal_obj.on('hidden.bs.modal', function () {
             $('#comment-box').show();

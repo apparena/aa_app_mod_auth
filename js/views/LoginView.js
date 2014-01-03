@@ -4,14 +4,8 @@ define([
     'backbone',
     'modules/auth/js/models/LoginModel',
     'text!modules/auth/templates/login.html',
-    'text!modules/auth/templates/modal.html',
-    'modules/notification/js/views/NotificationView',
-    'modules/facebook/js/views/FacebookView',
-    'modules/twitter/js/views/TwitterView',
-    'modules/google/js/views/GoogleView',
-    'text!modules/auth/templates/social_connect.html',
-    'text!modules/auth/templates/mail_connect.html'
-], function ($, _, Backbone, LoginModel, LoginTemplate, ModalTemplate, NotificationView, Facebook, Twitter, Google, SocialConnectTemplate, MailConnectTemplate) {
+    'modules/notification/js/views/NotificationView'
+], function ($, _, Backbone, LoginModel, LoginTemplate, NotificationView) {
 
     'use strict';
 
@@ -29,7 +23,7 @@ define([
         tmpUserData: null,
 
         initialize: function () {
-            _.bindAll(this, 'render', 'loginProcess', 'mailLogin', 'fbLoginDone', 'twLoginDone', 'gpLoginDone');
+            _.bindAll(this, 'render', 'renderModal', 'loginProcess', 'mailLogin', 'fbLoginDone', 'twLoginDone', 'gpLoginDone');
 
             this.loginModel = LoginModel.init({
                 id: 1
@@ -62,33 +56,23 @@ define([
         },
 
         render: function () {
-            var compiledModalTemplate = _.template(ModalTemplate, this.data),
-                compiledMailConnectTemplate = _.template(MailConnectTemplate, {}),
-                compiledSocialConnectTemplate = _.template(SocialConnectTemplate, {}),
+            var that = this,
                 compiledFormTemplate, showSocialConnect = '', showMailConnect = '';
+
+            this.dependencies = {};
 
             if (_.c('login_social_networks').indexOf('gplus') !== -1 ||
                 _.c('login_social_networks').indexOf('twitter') !== -1 ||
                 _.c('login_social_networks').indexOf('fb') !== -1
                 ) {
-                showSocialConnect = compiledSocialConnectTemplate;
+                this.dependencies['showSocialConnect'] = 'text!modules/auth/templates/social_connect.html';
             }
 
             if (_.c('login_social_networks').indexOf('email_password') !== -1) {
-                showMailConnect = compiledMailConnectTemplate;
+                this.dependencies['showMailConnect'] = 'text!modules/auth/templates/mail_connect.html';
             }
-
-            compiledFormTemplate = _.template(LoginTemplate, {
-                showMailConnect:   showMailConnect,
-                showSocialConnect: showSocialConnect
-            });
 
             this.setDoorModalObject();
-            if (typeof this.modal_obj === 'undefined' || this.modal_obj.length === 0) {
-                this.$el.append(compiledModalTemplate);
-                this.$el.find('#' + this.data.modal_id).find('.modal-body-wrapper').append(compiledFormTemplate);
-                this.setDoorModalObject();
-            }
             return this;
         },
 
@@ -96,8 +80,54 @@ define([
             this.modal_obj = $('#' + this.data.modal_id);
         },
 
+        renderModal: function () {
+            var that = this,
+                dependencies = [];
+
+            this.dependencies['ModalTemplate'] = 'text!modules/auth/templates/modal.html';
+
+            // create dependencie array for require
+            _.each(this.dependencies, function (value) {
+                dependencies.push(value);
+            });
+
+            require(dependencies, function () {
+                var num = arguments.length,
+                    compiledModalTemplate, compiledFormTemplate, showMailConnect, showSocialConnect, ModalTemplate,
+                    templateData = {};
+
+                // handle function arguments
+                _.each(that.dependencies, function (value, key) {
+                    if (key === 'ModalTemplate') {
+                        ModalTemplate = require(value);
+                    } else if (key === 'showSocialConnect') {
+                        showSocialConnect = require(value);
+                    } else if (key === 'showMailConnect') {
+                        showMailConnect = require(value);
+                    }
+                });
+
+                compiledModalTemplate = _.template(ModalTemplate, that.data);
+
+                that.setDoorModalObject();
+                if (typeof that.modal_obj === 'undefined' || that.modal_obj.length === 0) {
+                    compiledFormTemplate = _.template(LoginTemplate, {
+                        showMailConnect:   _.template(showSocialConnect, {}),
+                        showSocialConnect: _.template(showMailConnect, {})
+                    });
+                    that.$el.append(compiledModalTemplate);
+                    that.$el.find('#' + that.data.modal_id).find('.modal-body-wrapper').append(compiledFormTemplate);
+                    that.setDoorModalObject();
+                }
+
+                that.openModal();
+            });
+            return this;
+        },
+
         openModal: function () {
             var that = this;
+
             this.modal_obj.on('shown.bs.modal', function () {
                 that.modal_obj.find('input').first().focus();
                 $('#comment-box').hide();
@@ -105,17 +135,41 @@ define([
 
             this.modal_obj.modal('show');
 
-            this.facebook = Facebook.init();
-            this.facebook.addClickEventListener();
-            _.singleton.model.fbLogin.on('change', this.fbLoginDone, this);
+            if (_.c('login_social_networks').indexOf('fb') !== -1) {
+                require([
+                    'modules/facebook/js/views/FacebookView',
+                    'modules/facebook/js/models/LoginModel'
+                ], function (Facebook, LoginModel) {
+                    that.facebook = Facebook.init();
+                    that.facebook.addClickEventListener();
+                    that.facebookLoginModel = LoginModel.init();
+                    that.facebookLoginModel.on('change', that.fbLoginDone, that);
+                });
+            }
 
-            this.twitter = Twitter.init();
-            this.twitter.addClickEventListener();
-            _.singleton.model.twLogin.on('change', this.twLoginDone, this);
+            if (_.c('login_social_networks').indexOf('twitter') !== -1) {
+                require([
+                    'modules/twitter/js/views/TwitterView',
+                    'modules/twitter/js/models/LoginModel'
+                ], function (Twitter, LoginModel) {
+                    that.twitter = Twitter.init();
+                    that.twitter.addClickEventListener();
+                    that.twitterLoginModel = LoginModel.init();
+                    that.twitterLoginModel.on('change', that.twLoginDone, that);
+                });
+            }
 
-            this.google = Google.init();
-            this.google.addClickEventListener();
-            _.singleton.model.gpLogin.on('change', this.gpLoginDone, this);
+            if (_.c('login_social_networks').indexOf('gplus') !== -1) {
+                require([
+                    'modules/google/js/views/GoogleView',
+                    'modules/google/js/models/LoginModel'
+                ], function (Google, LoginModel) {
+                    that.google = Google.init();
+                    that.google.addClickEventListener();
+                    that.googleLoginModel = LoginModel.init();
+                    that.googleLoginModel.on('change', that.gpLoginDone, that);
+                });
+            }
 
             this.goTo('call/login');
         },
@@ -123,11 +177,11 @@ define([
         fbLoginDone: function () {
             // store some fb data in login model
             this.loginModel.set({
-                login_type: _.singleton.model.fbLogin.get('login_type'),
-                sid:        _.singleton.model.fbLogin.get('fbid'),
-                email:      _.singleton.model.fbLogin.get('email'),
+                login_type: this.facebookLoginModel.get('login_type'),
+                sid:        this.facebookLoginModel.get('fbid'),
+                email:      this.facebookLoginModel.get('email'),
                 password:   '',
-                avatar:     'https://graph.facebook.com/' + _.singleton.model.fbLogin.get('fbid') + '/picture?width=40&height=40'
+                avatar:     'https://graph.facebook.com/' + this.facebookLoginModel.get('fbid') + '/picture?width=40&height=40'
             });
 
             this.loginProcess();
@@ -137,12 +191,12 @@ define([
         twLoginDone: function () {
             // store some tw data in login model
             this.loginModel.set({
-                login_type: _.singleton.model.twLogin.get('login_type'),
-                sid:        _.singleton.model.twLogin.get('twid'),
-                email:      _.singleton.model.twLogin.get('email'),
+                login_type: this.twitterLoginModel.get('login_type'),
+                sid:        this.twitterLoginModel.get('twid'),
+                email:      this.twitterLoginModel.get('email'),
                 //email:      '',
                 password:   '',
-                avatar:     _.singleton.model.twLogin.get('avatar')
+                avatar:     this.twitterLoginModel.get('avatar')
             });
 
             this.loginProcess();
@@ -152,12 +206,12 @@ define([
         gpLoginDone: function () {
             // store some gp data in login model
             this.loginModel.set({
-                login_type: _.singleton.model.gpLogin.get('login_type'),
-                sid:        _.singleton.model.gpLogin.get('gpid'),
-                //email:      _.singleton.model.gpLogin.get('email'),
+                login_type: this.googleLoginModel.get('login_type'),
+                sid:        this.googleLoginModel.get('gpid'),
+                //email:      this.googleLoginModel.get('email'),
                 email:      '',
                 password:   '',
-                avatar:     _.singleton.model.gpLogin.get('avatar')
+                avatar:     this.googleLoginModel.get('avatar')
             });
 
             this.loginProcess();
@@ -325,12 +379,6 @@ define([
                         message: 'some went wrong, but I don\'t know what exactly - ' + data.message
                     }
                 });
-                /*this.notice_prperties = {
-                 title:       _.t('msg_login_error_title') + ' - Code 200',
-                 description: _.t('msg_login_error_description'),
-                 type:        'error'
-                 };
-                 this.notification.setOptions(this.notice_prperties).show();*/
 
                 _.debug.error('error, code 200');
                 this.log('action', 'user_participated_error', {
@@ -355,7 +403,7 @@ define([
             // save uid global
             _.uid = parseInt(uid, 10);
 
-            if (_(uid).isBlank() === false && (uid > 0 || login_type === 'fbuser')) {
+            if (_.isEmpty(uid) === false && (uid > 0 || login_type === 'fbuser')) {
                 nav.find('#nav-login').addClass('hide').end().find('.nav-logout').removeClass('hide');
                 $('.nav-profile').removeClass('hide').find('img').attr('src', this.loginModel.get('avatar'));
 
