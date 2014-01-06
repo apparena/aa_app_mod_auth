@@ -395,7 +395,7 @@ define([
         },
 
         handleNavigation: function () {
-            //_.debug.log('handleNavigation');
+            _.debug.log('handleNavigation');
             this.loginModel.fetch();
             var nav = $('.navbar-nav'),
                 admins = ',' + _.c('admin_mails').replace(/ /g, '') + ',',
@@ -404,8 +404,7 @@ define([
 
             // save uid global
             _.uid = parseInt(uid, 10);
-
-            if (_.isEmpty(uid) === false && (uid > 0 || login_type === 'fbuser')) {
+            if (_.isNumber(uid) && (uid > 0/* || login_type === 'fbuser'*/)) {
                 nav.find('#nav-login').addClass('hide').end().find('.nav-logout').removeClass('hide');
                 $('.nav-profile').removeClass('hide').find('img').attr('src', this.loginModel.get('avatar'));
 
