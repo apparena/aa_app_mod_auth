@@ -19,7 +19,7 @@ define([
             login_type: 'appuser',
             session:    '',
             action:     'login',
-            module:     'participate',
+            module:     'auth',
             avatar:     'https://secure.gravatar.com/avatar/00000000000000000000000000000000?s=40&d=mm',
             email:      ''
         },

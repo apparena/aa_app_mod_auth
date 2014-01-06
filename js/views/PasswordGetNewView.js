@@ -18,7 +18,7 @@ define([
             'click #submit-getnewpw': 'submit'
         },
 
-        moduleName: 'participate',
+        moduleName: 'auth',
 
         initialize: function () {
             _.bindAll(this, 'render', 'redirectToPwLost', 'submit', 'callbackHandler');

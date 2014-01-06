@@ -248,7 +248,7 @@ define([
                 customContent;
 
             this.ajax({
-                module:  'participate',
+                module:  'auth',
                 action:  'participate',
                 uid:     _.uid,
                 door_id: _.current_door_id

@@ -29,7 +29,7 @@ define([
             newsletter:     'false',
             reminder:       'false',
             action:         'data',
-            module:         'participate'
+            module:         'auth'
         },
 
         initialize: function () {
