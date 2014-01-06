@@ -4,7 +4,9 @@ define([
     'backbone',
     'modules/auth/js/models/LoginModel',
     'text!modules/auth/templates/login.html',
-    'modules/notification/js/views/NotificationView'
+    'modules/notification/js/views/NotificationView',
+    'jquery.validator_config',
+    'jquery.serialize_object'
 ], function ($, _, Backbone, LoginModel, LoginTemplate, NotificationView) {
 
     'use strict';
@@ -247,7 +249,7 @@ define([
 
                     password: {
                         required:  _.t('msg_require_password'),
-                        minlength: jQuery.format(_.t('msg_require_password_format'))
+                        minlength: $.format(_.t('msg_require_password_format'))
                     }
                 }
             });
