@@ -395,7 +395,6 @@ define([
         },
 
         handleNavigation: function () {
-            _.debug.log('handleNavigation');
             this.loginModel.fetch();
             var nav = $('.navbar-nav'),
                 admins = ',' + _.c('admin_mails').replace(/ /g, '') + ',',
