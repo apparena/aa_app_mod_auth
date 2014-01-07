@@ -21,8 +21,10 @@ define([
     });
 
     Remove = function () {
-        _.singleton.collection[namespace].unbind().remove();
-        delete _.singleton.collection[namespace];
+        if (!_.isUndefined(_.singleton.collection[namespace])) {
+            _.singleton.collection[namespace].stopListening().undelegateEvents().reset();
+            delete _.singleton.collection[namespace];
+        }
     };
 
     Init = function (init) {
