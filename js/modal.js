@@ -2,17 +2,19 @@ define([
     'underscore',
     'modules/auth/js/views/LoginView'
 ], function (_, LoginView) {
-//test
     'use strict';
 
     return function () {
-        var loginView = LoginView.init();
+        var loginView = LoginView.init(),
+            el = loginView.$el;
         loginView.render().renderModal();
         $('#comment-box').hide();
-        loginView.modal_obj.on('hidden.bs.modal', function () {
+
+        el.on('hidden.bs.modal', function () {
+            el.off('hidden.bs.modal');
             $('#comment-box').show();
-            loginView.destroy();
-            delete _.singleton.view.login;
+            LoginView.remove();
         });
+
     };
 });

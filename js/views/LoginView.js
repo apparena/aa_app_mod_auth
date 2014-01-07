@@ -118,7 +118,8 @@ define([
                         showSocialConnect: _.template(showMailConnect, {})
                     });
                     that.$el.append(compiledModalTemplate);
-                    that.$el.find('#' + that.data.modal_id).find('.modal-body-wrapper').append(compiledFormTemplate);
+                    that.setElement(that.$el.find('#' + that.data.modal_id));
+                    that.$el.find('.modal-body-wrapper').append(compiledFormTemplate);
                     that.setDoorModalObject();
                 }
 
@@ -434,12 +435,13 @@ define([
     });
 
     Remove = function () {
-        _.singleton.view[namespace].unbind().remove();
-        delete _.singleton.view[namespace];
+        if (!_.isUndefined(_.singleton.view[namespace])) {
+            _.singleton.view[namespace].stopListening().undelegateEvents().remove();
+            delete _.singleton.view[namespace];
+        }
     };
 
     Init = function (init) {
-
         if (_.isUndefined(_.singleton.view[namespace])) {
             _.singleton.view[namespace] = new View();
         } else {

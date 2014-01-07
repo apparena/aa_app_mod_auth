@@ -241,7 +241,6 @@ define([
         },
 
         showTerminal: function () {
-            //_.debug.log('showTerminal');
             var that = this,
                 terminalView,
                 doorviewModel,
@@ -260,7 +259,6 @@ define([
                         _.singleton.collection.participation = new ParticipationCollection();
                     }
                     _.each(resp.data.participations, function (value, key) {
-                        //_.debug.log('value', value, 'key', key);
                         _.singleton.collection.participation.create({
                             id:             key,
                             participations: value
@@ -294,21 +292,10 @@ define([
                                 }
                             }
                         });
-
-                        /*that.log('admin', 'user_participated', {
-                         log: {
-                                user_participated: ''
-                            }
-                         });*/
                     } else if (resp.data.code === 403) {
                         if (_.isUndefined(_.singleton.view.notification)) {
                             _.singleton.view.notification = new NotificationView();
                         }
-                        /*_.singleton.view.notification.setOptions({
-                         title:       _.t('msg_participation_title_forbidden'),
-                         description: _.t('msg_participation_desc_forbidden'),
-                         type:        'error'
-                         }, true).show();*/
 
                         _.singleton.view.facebook.getScrollPosition(function (position) {
                             var options = {
@@ -415,8 +402,10 @@ define([
     });
 
     Remove = function () {
-        _.singleton.view[namespace].unbind().remove();
-        delete _.singleton.view[namespace];
+        if (!_.isUndefined(_.singleton.view[namespace])) {
+            _.singleton.view[namespace].stopListening().undelegateEvents().remove();
+            delete _.singleton.view[namespace];
+        }
     };
 
     Init = function (init) {
