@@ -1,17 +1,17 @@
 define([
+    'ViewExtend',
     'jquery',
     'underscore',
     'backbone',
     'text!modules/auth/templates/passwordLost.html',
     'modules/optivo/js/views/OptivoView',
     'modules/auth/js/models/PasswordLostModel'
-], function ($, _, Backbone, PasswordLostTemplate, OptivoView, PasswordLostModel) {
+], function (View, $, _, Backbone, PasswordLostTemplate, OptivoView, PasswordLostModel) {
     'use strict';
 
-    var namespace = 'authPasswordLost',
-        View, Init, Remove, Instance;
+    View.namespace = 'authPasswordLost';
 
-    View = Backbone.View.extend({
+    View.code = Backbone.View.extend({
         el: $('.content-wrapper'),
 
         events: {
@@ -115,36 +115,5 @@ define([
         }
     });
 
-    Remove = function () {
-        if (!_.isUndefined(_.singleton.view[namespace])) {
-            _.singleton.view[namespace].stopListening().undelegateEvents().remove();
-            delete _.singleton.view[namespace];
-        }
-    };
-
-    Init = function (init) {
-
-        if (_.isUndefined(_.singleton.view[namespace])) {
-            _.singleton.view[namespace] = new View();
-        } else {
-            if (!_.isUndefined(init) && init === true) {
-                Remove();
-                _.singleton.view[namespace] = new View();
-            }
-        }
-
-        return _.singleton.view[namespace];
-    };
-
-    Instance = function () {
-        return _.singleton.view[namespace];
-    };
-
-    return {
-        init:        Init,
-        view:        View,
-        remove:      Remove,
-        namespace:   namespace,
-        getInstance: Instance
-    };
+    return View;
 });

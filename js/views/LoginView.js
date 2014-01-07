@@ -1,4 +1,5 @@
 define([
+    'ViewExtend',
     'jquery',
     'underscore',
     'backbone',
@@ -7,14 +8,12 @@ define([
     'modules/notification/js/views/NotificationView',
     'jquery.validator_config',
     'jquery.serialize_object'
-], function ($, _, Backbone, LoginModel, LoginTemplate, NotificationView) {
-
+], function (View, $, _, Backbone, LoginModel, LoginTemplate, NotificationView) {
     'use strict';
 
-    var namespace = 'authLogin',
-        View, Init, Remove, Instance;
+    View.namespace = 'authLogin';
 
-    View = Backbone.View.extend({
+    View.code = Backbone.View.extend({
         el: $('body'),
 
         events: {
@@ -426,7 +425,6 @@ define([
         checkKeypress: function (event) {
             var key = event.keyCode || event.which,
                 btn;
-            //_.debug.log(key);
             if (key === 13) {
                 btn = $('.modal').find('button#sign-in');
                 this.mailLogin(btn);
@@ -434,35 +432,5 @@ define([
         }
     });
 
-    Remove = function () {
-        if (!_.isUndefined(_.singleton.view[namespace])) {
-            _.singleton.view[namespace].stopListening().undelegateEvents().remove();
-            delete _.singleton.view[namespace];
-        }
-    };
-
-    Init = function (init) {
-        if (_.isUndefined(_.singleton.view[namespace])) {
-            _.singleton.view[namespace] = new View();
-        } else {
-            if (!_.isUndefined(init) && init === true) {
-                Remove();
-                _.singleton.view[namespace] = new View();
-            }
-        }
-
-        return _.singleton.view[namespace];
-    };
-
-    Instance = function () {
-        return _.singleton.view[namespace];
-    };
-
-    return {
-        init:        Init,
-        view:        View,
-        remove:      Remove,
-        namespace:   namespace,
-        getInstance: Instance
-    };
+    return View;
 });

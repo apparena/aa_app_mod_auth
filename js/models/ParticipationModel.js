@@ -1,13 +1,13 @@
 define([
+    'ModelExtend',
     'underscore',
     'backbone'
-], function (_, Backbone) {
+], function (Model,_, Backbone) {
     'use strict';
 
-    var namespace = 'authParticipations',
-        Model, Init, Remove, Instance;
+    Model.namespace = 'authParticipations';
 
-    Model = Backbone.Model.extend({
+    Model.code = Backbone.Model.extend({
 
         defaults: {
             door_id:        null,
@@ -15,36 +15,5 @@ define([
         }
     });
 
-    Remove = function () {
-        if (!_.isUndefined(_.singleton.model[namespace])) {
-            _.singleton.model[namespace].stopListening().undelegateEvents().clear();
-            delete _.singleton.model[namespace];
-        }
-    };
-
-    Init = function (init) {
-
-        if (_.isUndefined(_.singleton.model[namespace])) {
-            _.singleton.model[namespace] = new Model();
-        } else {
-            if (!_.isUndefined(init) && init === true) {
-                Remove();
-                _.singleton.model[namespace] = new Model();
-            }
-        }
-
-        return _.singleton.model[namespace];
-    };
-
-    Instance = function () {
-        return _.singleton.model[namespace];
-    };
-
-    return {
-        init:        Init,
-        model:       Model,
-        remove:      Remove,
-        namespace:   namespace,
-        getInstance: Instance
-    };
+    return Model;
 });

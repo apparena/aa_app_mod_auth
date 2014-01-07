@@ -1,4 +1,5 @@
 define([
+    'ViewExtend',
     'jquery',
     'underscore',
     'backbone',
@@ -9,14 +10,12 @@ define([
     'modules/optivo/js/views/OptivoView',
     'modules/auth/js/collections/ParticipationCollection',
     'modules/notification/js/views/NotificationView'
-], function ($, _, Backbone, UserdataTemplate, TerminalView, LoginModel, UserDataModel, OptivoView, ParticipationCollection, NotificationView) {
-
+], function (View, $, _, Backbone, UserdataTemplate, TerminalView, LoginModel, UserDataModel, OptivoView, ParticipationCollection, NotificationView) {
     'use strict';
 
-    var namespace = 'authParticipation',
-        View, Init, Remove, Instance;
+    View.namespace = 'authParticipation';
 
-    View = Backbone.View.extend({
+    View.code = Backbone.View.extend({
         tagName: 'div',
 
         className: 'participate-container',
@@ -401,36 +400,5 @@ define([
         }
     });
 
-    Remove = function () {
-        if (!_.isUndefined(_.singleton.view[namespace])) {
-            _.singleton.view[namespace].stopListening().undelegateEvents().remove();
-            delete _.singleton.view[namespace];
-        }
-    };
-
-    Init = function (init) {
-
-        if (_.isUndefined(_.singleton.view[namespace])) {
-            _.singleton.view[namespace] = new View();
-        } else {
-            if (!_.isUndefined(init) && init === true) {
-                Remove();
-                _.singleton.view[namespace] = new View();
-            }
-        }
-
-        return _.singleton.view[namespace];
-    };
-
-    Instance = function () {
-        return _.singleton.view[namespace];
-    };
-
-    return {
-        init:        Init,
-        view:        View,
-        remove:      Remove,
-        namespace:   namespace,
-        getInstance: Instance
-    };
+    return View;
 });
