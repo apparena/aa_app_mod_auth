@@ -38,8 +38,10 @@ define([
     });
 
     Remove = function () {
-        _.singleton.model[namespace].unbind().remove();
-        delete _.singleton.model[namespace];
+        if (!_.isUndefined(_.singleton.model[namespace])) {
+            _.singleton.model[namespace].stopListening().undelegateEvents().clear();
+            delete _.singleton.model[namespace];
+        }
     };
 
     Init = function (init) {
