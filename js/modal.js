@@ -5,16 +5,14 @@ define([
     'use strict';
 
     return function () {
-        var loginView = LoginView.init(),
+        var loginView = LoginView().init(),
             el = loginView.$el;
         loginView.render().renderModal();
         $('#comment-box').hide();
-
         el.on('hidden.bs.modal', function () {
             el.off('hidden.bs.modal');
             $('#comment-box').show();
-            LoginView.remove();
+            LoginView().remove();
         });
-
     };
 });
