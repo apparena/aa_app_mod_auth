@@ -84,12 +84,13 @@ define([
                 this.modal_obj = $('#' + this.data.modal_id);
             },
 
-            renderPage: function () {
+            renderPage: function (redirection) {
                 var that = this,
                     dependencies = [];
 
                 // set page type
                 this.pagetype = 'page';
+                this.redirection = redirection || '';
                 this.dependencies['PageTemplate'] = 'text!modules/auth/templates/login_content_page.html';
 
                 // create dependencie array for require
@@ -266,7 +267,6 @@ define([
             },
 
             mailLogin: function (element) {
-                _.debug.log('test');
                 // get form data
                 var form = $('#form-sign-up'),
                     data = (form) ? form.serializeObject() : {};
@@ -401,11 +401,7 @@ define([
                         });
                         this.modal_obj.modal('hide');
                     } else {
-                        if (_.isUndefined(this.redirection)) {
-                            this.goTo('');
-                        } else {
-                            this.goTo(this.redirection);
-                        }
+                        this.goTo(this.redirection || '');
                     }
                 } else if (data.code === '203') {
                     // wrong password
