@@ -17,6 +17,8 @@ define([
         View.code = Backbone.View.extend({
             el: $('body'),
 
+            enableKeypress: false,
+
             events: {
                 'click #sign-in': 'mailLogin',
                 'keyup :input':   'checkKeypress'
@@ -27,7 +29,7 @@ define([
             initialize: function () {
                 _.bindAll(this, 'render', 'renderModal', 'renderPage', 'loginProcess', 'mailLogin', 'fbLoginDone', 'twLoginDone', 'gpLoginDone');
 
-                this.loginModel = LoginModel.init({
+                this.loginModel = LoginModel().init({
                     id: 1
                 });
                 this.loginModel.on('change:uid', this.handleNavigation, this);
@@ -77,6 +79,7 @@ define([
                 }
 
                 this.setDoorModalObject();
+                this.enableKeypress = true;
                 return this;
             },
 
@@ -119,9 +122,9 @@ define([
                     });
 
                     // add content and define new element
-                    that.$el.find('.content-wrapper').html(compiledPageTemplate);
-                    that.setElement(that.$el.find('.content-wrapper'));
-                    that.$el.find('.login-body').append(compiledFormTemplate);
+                    that.$('.content-wrapper').html(compiledPageTemplate);
+                    that.setElement(that.$('.content-wrapper'));
+                    that.$('.login-body').append(compiledFormTemplate);
                 });
                 return this;
             },
@@ -163,8 +166,8 @@ define([
                         });
                         // add content and define new element
                         that.$el.append(compiledModalTemplate);
-                        that.setElement(that.$el.find('#' + that.data.modal_id));
-                        that.$el.find('.modal-body-wrapper').append(compiledFormTemplate);
+                        that.setElement(that.$('#' + that.data.modal_id));
+                        that.$('.modal-body-wrapper').append(compiledFormTemplate);
                         that.setDoorModalObject();
                     }
 
@@ -403,6 +406,7 @@ define([
                     } else {
                         this.goTo(this.redirection || '');
                     }
+                    this.enableKeypress = false;
                 } else if (data.code === '203') {
                     // wrong password
                     this.log('action', 'user_participate_login_wrong', {
@@ -474,7 +478,7 @@ define([
             checkKeypress: function (event) {
                 var key = event.keyCode || event.which,
                     btn;
-                if (key === 13) {
+                if (key === 13 && this.enableKeypress === true) {
                     btn = $('.modal').find('button#sign-in');
                     this.mailLogin(btn);
                 }
