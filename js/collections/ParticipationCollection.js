@@ -7,17 +7,17 @@ define([
 ], function (Collection, _, Backbone, ParticipateModel) {
     'use strict';
 
-    Collection.namespace = 'authParticipation';
+    return function () {
+        Collection.namespace = 'authParticipation';
 
-    Collection.code = Backbone.Collection.extend({
-        localStorage: new Backbone.LocalStorage('AppArenaAdventskalenderApp_' + _.aa.instance.aa_inst_id + '_Participations'),
+        Collection.code = Backbone.Collection.extend({
+            localStorage: new Backbone.LocalStorage('AppArenaAdventskalenderApp_' + _.aa.instance.aa_inst_id + '_Participations'),
 
-        model: ParticipateModel,
+            model: ParticipateModel,
 
-        initialize: function () {
-            this.fetch();
-        }
-    });
-
-    return Collection;
+            initialize: function () {
+                this.fetch();
+            }
+        });
+    }
 });

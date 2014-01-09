@@ -3,22 +3,24 @@ define([
     'underscore',
     'backbone',
     'localstorage'
-], function (Model,_, Backbone) {
+], function (Model, _, Backbone) {
     'use strict';
 
-    Model.namespace = 'authPasswordLost';
+    return function () {
+        Model.namespace = 'authPasswordLost';
 
-    Model.code = Backbone.Model.extend({
-        localStorage: new Backbone.LocalStorage('AppArenaAdventskalenderApp_' + _.aa.instance.aa_inst_id + '_PasswordLost'),
+        Model.code = Backbone.Model.extend({
+            localStorage: new Backbone.LocalStorage('AppArenaAdventskalenderApp_' + _.aa.instance.aa_inst_id + '_PasswordLost'),
 
-        defaults: {
-            email: ''
-        },
+            defaults: {
+                email: ''
+            },
 
-        initialize: function () {
-            this.fetch();
-        }
-    });
+            initialize: function () {
+                this.fetch();
+            }
+        });
 
-    return Model;
+        return Model;
+    }
 });

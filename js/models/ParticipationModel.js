@@ -2,18 +2,20 @@ define([
     'ModelExtend',
     'underscore',
     'backbone'
-], function (Model,_, Backbone) {
+], function (Model, _, Backbone) {
     'use strict';
 
-    Model.namespace = 'authParticipations';
+    return function () {
+        Model.namespace = 'authParticipations';
 
-    Model.code = Backbone.Model.extend({
+        Model.code = Backbone.Model.extend({
 
-        defaults: {
-            door_id:        null,
-            participations: 0
-        }
-    });
+            defaults: {
+                door_id:        null,
+                participations: 0
+            }
+        });
 
-    return Model;
+        return Model;
+    }
 });
