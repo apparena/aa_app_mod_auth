@@ -27,7 +27,7 @@ define([
             tmpUserData: null,
 
             initialize: function () {
-                _.bindAll(this, 'render', 'renderModal', 'renderPage', 'loginProcess', 'mailLogin', 'fbLoginDone', 'twLoginDone', 'gpLoginDone');
+                _.bindAll(this, 'render', 'renderModal', 'openModal', 'renderPage', 'loginProcess', 'addSocialLogin', 'mailLogin', 'fbLoginDone', 'twLoginDone', 'gpLoginDone');
 
                 this.loginModel = LoginModel().init({
                     id: 1
@@ -125,6 +125,7 @@ define([
                     that.$('.content-wrapper').html(compiledPageTemplate);
                     that.setElement(that.$('.content-wrapper'));
                     that.$('.login-body').append(compiledFormTemplate);
+                    that.addSocialLogin();
                 });
                 return this;
             },
@@ -185,6 +186,13 @@ define([
                 });
 
                 this.modal_obj.modal('show');
+                this.addSocialLogin();
+
+                this.goTo('call/login/modal');
+            },
+
+            addSocialLogin: function () {
+                var that = this;
 
                 if (_.c('login_social_networks').indexOf('fb') !== -1) {
                     require([
@@ -221,8 +229,6 @@ define([
                         that.googleLoginModel.on('change', that.gpLoginDone, that);
                     });
                 }
-
-                this.goTo('call/login/modal');
             },
 
             fbLoginDone: function () {
