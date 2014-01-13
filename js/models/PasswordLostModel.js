@@ -10,7 +10,7 @@ define([
         Model.namespace = 'authPasswordLost';
 
         Model.code = Backbone.Model.extend({
-            localStorage: new Backbone.LocalStorage('AppArenaAdventskalenderApp_' + _.aa.instance.aa_inst_id + '_PasswordLost'),
+            localStorage: new Backbone.LocalStorage('AppArenaAdventskalenderApp_' + _.aa.instance.i_id + '_PasswordLost'),
 
             defaults: {
                 email: ''

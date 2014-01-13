@@ -11,7 +11,7 @@ define([
         Collection.namespace = 'authParticipation';
 
         Collection.code = Backbone.Collection.extend({
-            localStorage: new Backbone.LocalStorage('AppArenaAdventskalenderApp_' + _.aa.instance.aa_inst_id + '_Participations'),
+            localStorage: new Backbone.LocalStorage('AppArenaAdventskalenderApp_' + _.aa.instance.i_id + '_Participations'),
 
             model: ParticipateModel,
 
