@@ -417,7 +417,6 @@ define([
                     }
                     this.enableKeypress = false;
                 } else if (data.code === '203') {
-                    _.debug.log('wrong password, show notification');
                     // wrong password
                     this.log('action', 'user_participate_login_wrong', {
                         auth_uid:      _.uid,
@@ -448,7 +447,7 @@ define([
                         }
                     });
 
-                    _.debug.error('error, code 200');
+                    _.debug.error('code 200', 'critical error on login');
                     this.log('action', 'user_participated_error', {
                         auth_uid:      _.uid,
                         auth_uid_temp: _.uid_temp,
