@@ -5,10 +5,9 @@ define([
     'backbone',
     'modules/auth/js/models/LoginModel',
     'text!modules/auth/templates/login.html',
-    'modules/notification/js/views/NotificationView',
     'jquery.validator_config',
     'jquery.serialize_object'
-], function (View, $, _, Backbone, LoginModel, LoginTemplate, NotificationView) {
+], function (View, $, _, Backbone, LoginModel, LoginTemplate) {
     'use strict';
 
     return function () {
@@ -35,8 +34,6 @@ define([
                     id: 1
                 });
                 this.loginModel.on('change:uid', this.handleNavigation, this);
-
-                this.notification = NotificationView.init();
 
                 this.data = {
                     'modal_id':   'sign-up-modal',
@@ -420,6 +417,7 @@ define([
                     }
                     this.enableKeypress = false;
                 } else if (data.code === '203') {
+                    _.debug.log('wrong password, show notification');
                     // wrong password
                     this.log('action', 'user_participate_login_wrong', {
                         auth_uid:      _.uid,
@@ -430,12 +428,14 @@ define([
                             message: data.message
                         }
                     });
-                    this.notice_properties = {
-                        title:       _.t('msg_login_wrongdata_title'),
-                        description: _.t('msg_login_wrongdata_description'),
-                        type:        'notice'
-                    };
-                    this.notification.setOptions(this.notice_properties).show();
+
+                    require(['modules/notification/js/views/NotificationView'], function (NotificationView) {
+                        NotificationView().init().setOptions({
+                            title:       _.t('msg_login_wrongdata_title'),
+                            description: _.t('msg_login_wrongdata_description'),
+                            type:        'notice'
+                        }).show();
+                    });
                 } else {
                     // critical other error
                     this.log('action', 'user_participate_login_error', {

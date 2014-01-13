@@ -10,7 +10,7 @@ CREATE TABLE `mod_auth_pwlost` (
 CREATE TABLE `mod_auth_user` (
     `uid`        BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
     `gid`        INT(11) UNSIGNED    NOT NULL DEFAULT '0',
-    `aa_inst_id` INT(11) UNSIGNED    NOT NULL,
+    `i_id` INT(11) UNSIGNED    NOT NULL,
     `user`       VARCHAR(255)        NOT NULL,
     `token`      VARCHAR(60)         NOT NULL,
     `fb_id`      BIGINT(20)          NULL DEFAULT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE `mod_auth_user` (
     `gp_id`      VARCHAR(50)         NULL DEFAULT NULL,
     `ip`         INT(11) UNSIGNED    NULL DEFAULT NULL,
     PRIMARY KEY (`uid`),
-    UNIQUE INDEX `aa_inst_id_user` (`user`, `aa_inst_id`)
+    UNIQUE INDEX `i_id_user` (`user`, `i_id`)
 )
     COLLATE ='utf8_general_ci'
     ENGINE =InnoDB;
