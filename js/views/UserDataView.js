@@ -21,6 +21,8 @@ define([
 
             enableKeypress: false,
 
+            redirection: '',
+
             events: {
                 'click .back':   'render',
                 'click .submit': 'submit',
@@ -28,15 +30,28 @@ define([
             },
 
             initialize: function () {
-                _.bindAll(this, 'render', 'userInformation', 'modifyElement', 'submit', 'allUserDataStored', 'checkKeypress');
+                _.bindAll(this, 'renderPage', 'renderModal', 'userInformation', 'addRedirection', 'modifyElement', 'submit', 'allUserDataStored', 'checkKeypress');
 
                 this.user_data_model = UserDataModel().init();
             },
 
-            render: function () {
+            renderPage: function () {
                 var that = this;
-                require(['text!modules/auth/templates/userdata_page.html'], function () {
-                    that.$el.html(that.template);
+                this.pagetype = 'page';
+                require(['text!modules/auth/templates/userdata_page.html'], function (UserdataTemplate) {
+                    that.$el.html(_.template(UserdataTemplate, that.userTemplatedata));
+                });
+                this.enableKeypress = true;
+            },
+
+            renderModal: function () {
+                var that = this;
+                this.pagetype = 'modal';
+                this.modifyElement($('body'));
+                require(['text!modules/auth/templates/userdata_modal.html'], function (UserdataTemplate) {
+                    that.$el.append(_.template(UserdataTemplate, that.userTemplatedata));
+                    that.modifyElement($('#userdatamodal'));
+                    that.$el.modal();
                 });
                 this.enableKeypress = true;
             },
@@ -48,7 +63,12 @@ define([
                 return this;
             },
 
-            userInformation: function (redirection) {
+            addRedirection: function (redirection) {
+                this.redirection = redirection || '';
+                return this;
+            },
+
+            userInformation: function () {
                 var that = this;
 
                 // todo check if login process is done
@@ -65,7 +85,6 @@ define([
                     return false;
                 }
 
-                this.redirection = redirection || '';
                 this.goTo('call/auth-userdata');
 
                 // define form requirements
@@ -106,16 +125,16 @@ define([
                     email = '';
                 }
 
-                data = {
+                this.userTemplatedata = {
                     'required':  this.required,
                     'user_data': this.user_data_model.attributes,
                     'email':     email
                 };
 
-                // render template and save it global
+               /* // render template and save it global
                 require(['text!modules/auth/templates/userdata_page.html'], function (UserdataTemplate) {
                     that.template = _.template(UserdataTemplate, data);
-                });
+                });*/
 
                 // set status
                 this.status = 'needUserdata';
@@ -247,6 +266,12 @@ define([
                 // set user_type from new to exist
                 this.model.set('user_type', 'exist');
                 this.model.save();
+
+                // close modal if pagetype is modal
+                if(this.pagetype === 'modal') {
+                    this.$el.modal('hide');
+                }
+
                 this.goTo(this.redirection);
                 return this;
             },

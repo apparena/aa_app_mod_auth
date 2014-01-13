@@ -19,6 +19,8 @@ define([
 
             enableKeypress: false,
 
+            redirection: '',
+
             events: {
                 'click #sign-in': 'mailLogin',
                 'keyup :input':   'checkKeypress'
@@ -27,7 +29,7 @@ define([
             tmpUserData: null,
 
             initialize: function () {
-                _.bindAll(this, 'render', 'renderModal', 'openModal', 'renderPage', 'loginProcess', 'addSocialLogin', 'mailLogin', 'fbLoginDone', 'twLoginDone', 'gpLoginDone');
+                _.bindAll(this, 'render', 'setDoorModalObject', 'addRedirection', 'renderModal', 'openModal', 'renderPage', 'loginProcess', 'addSocialLogin', 'mailLogin', 'fbLoginDone', 'twLoginDone', 'gpLoginDone');
 
                 this.loginModel = LoginModel().init({
                     id: 1
@@ -62,7 +64,6 @@ define([
             render: function () {
                 // set/revert basic element
                 this.setElement($('body'));
-
                 var showSocialConnect = '', showMailConnect = '';
 
                 this.dependencies = {};
@@ -85,15 +86,20 @@ define([
 
             setDoorModalObject: function () {
                 this.modal_obj = $('#' + this.data.modal_id);
+                return this;
             },
 
-            renderPage: function (redirection) {
+            addRedirection: function (redirection) {
+                this.redirection = redirection || '';
+                return this;
+            },
+
+            renderPage: function () {
                 var that = this,
                     dependencies = [];
 
                 // set page type
                 this.pagetype = 'page';
-                this.redirection = redirection || '';
                 this.dependencies['PageTemplate'] = 'text!modules/auth/templates/login_content_page.html';
 
                 // create dependencie array for require
@@ -180,9 +186,10 @@ define([
             openModal: function () {
                 var that = this;
 
+                // set focus on first input field
                 this.modal_obj.on('shown.bs.modal', function () {
                     that.modal_obj.find('input').first().focus();
-                    $('#comment-box').hide();
+                    //$('#comment-box').hide();
                 });
 
                 this.modal_obj.modal('show');
@@ -404,13 +411,12 @@ define([
 
                     if (this.pagetype === 'modal') {
                         // close login modal
-                        $('#comment-box').show();
-                        this.modal_obj.on('hidden.bs.modal', function () {
-                            that.modal_obj.remove();
-                        });
                         this.modal_obj.modal('hide');
+                        if(!_.isEmpty(this.redirection)) {
+                            this.goTo(this.redirection);
+                        }
                     } else {
-                        this.goTo(this.redirection || '');
+                        this.goTo(this.redirection);
                     }
                     this.enableKeypress = false;
                 } else if (data.code === '203') {

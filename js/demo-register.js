@@ -5,7 +5,7 @@ define(function () {
         var action = type || 'login';
         if (action === 'login') {
             require(['modules/auth/js/views/LoginView'], function (LoginView) {
-                LoginView().init().render().renderPage('page/auth/demo-register/userdata');
+                LoginView().init().render().addRedirection('page/auth/demo-register-modal/userdata').renderPage();
             });
         } else {
             require([
@@ -20,9 +20,11 @@ define(function () {
                         }
                     });
                 userDataView.modifyElement(element).userInformation();
-                if(userDataView.status === 'needUserdata') {
-                    userDataView.render();
+                if (userDataView.status === 'needUserdata') {
+                    // show userdata page
+                    userDataView.renderPage();
                 } else {
+                    // all userdata exist, redirect to startpage
                     _.navigate('');
                 }
             });
