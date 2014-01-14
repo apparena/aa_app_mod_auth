@@ -19,5 +19,7 @@ define([
                 this.fetch();
             }
         });
+
+        return Collection;
     }
 });
