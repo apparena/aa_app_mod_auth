@@ -9,163 +9,165 @@ define([
 ], function (View, $, _, Backbone, PasswordGetNewTemplate, NotificationView, PasswordLostModel) {
     'use strict';
 
-    View.namespace = 'authGetNewPassword';
+    return function () {
+        View.namespace = 'authGetNewPassword';
 
-    View.code = Backbone.View.extend({
-        el: $('.content-wrapper'),
+        View.code = Backbone.View.extend({
+            el: $('.content-wrapper'),
 
-        events: {
-            'click #submit-getnewpw': 'submit'
-        },
+            events: {
+                'click #submit-getnewpw': 'submit'
+            },
 
-        moduleName: 'auth',
+            moduleName: 'auth',
 
-        initialize: function () {
-            _.bindAll(this, 'render', 'redirectToPwLost', 'submit', 'callbackHandler');
+            initialize: function () {
+                _.bindAll(this, 'render', 'redirectToPwLost', 'submit', 'callbackHandler');
 
-            if (_.isUndefined(this.id) || this.id === '') {
-                this.redirectToPwLost();
-            }
-        },
+                if (_.isUndefined(this.id) || this.id === '') {
+                    this.redirectToPwLost();
+                }
+            },
 
-        render: function () {
-            var that = this,
-                secret_id = this.ajax({
-                    module: this.moduleName,
-                    action: 'getPasswortSecretId',
-                    secret: this.id
+            render: function () {
+                var that = this,
+                    secret_id = this.ajax({
+                        module: this.moduleName,
+                        action: 'getPasswortSecretId',
+                        secret: this.id
+                    });
+                this.passwordLostModel = new PasswordLostModel({id: 1});
+
+                if (secret_id.data.message !== this.id) {
+                    this.redirectToPwLost();
+                }
+
+                this.template = _.template(PasswordGetNewTemplate, {
+                    'secret_id': this.id,
+                    'email':     this.passwordLostModel.get('email')
                 });
-            this.passwordLostModel = new PasswordLostModel({id: 1});
+                this.$el.html(this.template);
 
-            if (secret_id.data.message !== this.id) {
-                this.redirectToPwLost();
-            }
+                _.delay(function () {
+                    that.goTo('call/auth-password');
+                }, 500);
+            },
 
-            this.template = _.template(PasswordGetNewTemplate, {
-                'secret_id': this.id,
-                'email':     this.passwordLostModel.get('email')
-            });
-            this.$el.html(this.template);
+            redirectToPwLost: function () {
+                this.goTo('page/auth/password');
+                return false;
+            },
 
-            _.delay(function () {
-                that.goTo('call/participate-password');
-            }, 500);
-        },
+            submit: function () {
+                this.form = this.$el.find('form');
+                this.btn_obj = this.form.find('button');
 
-        redirectToPwLost: function () {
-            this.goTo('page/participate/password');
-            return false;
-        },
+                var that = this,
+                    form_data = (this.form) ? this.form.serializeObject() : {};
 
-        submit: function () {
-            this.form = this.$el.find('form');
-            this.btn_obj = this.form.find('button');
+                // add new validation method
+                $.validator.addMethod('password_must_same', function (value, element) {
+                    return that.form.find('#password').val() === value;
+                }, 'Passwords are not the same');
 
-            var that = this,
-                form_data = (this.form) ? this.form.serializeObject() : {};
+                this.form.validate({
+                    debug: true,
+                    rules: {
+                        email: {
+                            required: true,
+                            email:    true
+                        },
 
-            // add new validation method
-            $.validator.addMethod('password_must_same', function (value, element) {
-                return that.form.find('#password').val() === value;
-            }, 'Passwords are not the same');
+                        password: {
+                            required:  true,
+                            minlength: 3
+                        },
 
-            this.form.validate({
-                debug: true,
-                rules: {
-                    email: {
-                        required: true,
-                        email:    true
+                        password2: {
+                            password_must_same: true
+                        }
                     },
 
-                    password: {
-                        required:  true,
-                        minlength: 3
-                    },
+                    messages: {
+                        email: {
+                            required: _.t('msg_require_mail'),
+                            email:    _.t('msg_require_mail_format')
+                        },
 
-                    password2: {
-                        password_must_same: true
+                        password:  {
+                            required:  _.t('msg_require_password'),
+                            minlength: jQuery.format(_.t('msg_require_password_format'))
+                        },
+                        password2: _.t('msg_require_password_again')
                     }
-                },
-
-                messages: {
-                    email: {
-                        required: _.t('msg_require_mail'),
-                        email:    _.t('msg_require_mail_format')
-                    },
-
-                    password:  {
-                        required:  _.t('msg_require_password'),
-                        minlength: jQuery.format(_.t('msg_require_password_format'))
-                    },
-                    password2: _.t('msg_require_password_again')
-                }
-            });
-
-            if (this.form.valid()) {
-                this.btn_obj.button('loading');
-                this.form.find('fieldset').prop('disabled', true);
-
-                this.ajax({
-                    module: this.moduleName,
-                    action: 'setNewPassword',
-                    data:   form_data
-                }, false, function (resp) {
-                    that.callbackHandler(resp);
                 });
-            }
-        },
 
-        callbackHandler: function (resp) {
-            //_.debug.log('mail versandt, nun alles resetten');
-            var that = this;
+                if (this.form.valid()) {
+                    this.btn_obj.button('loading');
+                    this.form.find('fieldset').prop('disabled', true);
 
-            if (_.isUndefined(_.singleton.view.notification)) {
-                _.singleton.view.notification = new NotificationView();
-            }
+                    this.ajax({
+                        module: this.moduleName,
+                        action: 'setNewPassword',
+                        data:   form_data
+                    }, false, function (resp) {
+                        that.callbackHandler(resp);
+                    });
+                }
+            },
 
-            _.singleton.view.facebook.getScrollPosition(function (position) {
-                var options = {
-                    title:       _.t('msg_mail_pwgetnew_title_error'),
-                    description: _.t('msg_mail_pwgetnew_desc_error'),
-                    type:        'error'
-                };
+            callbackHandler: function (resp) {
+                //_.debug.log('mail versandt, nun alles resetten');
+                var that = this;
 
-                if (resp.data.status === 'success') {
-                    options = {
-                        title:       _.t('msg_mail_pwgetnew_title_success'),
-                        description: _.t('msg_mail_pwgetnew_desc_success'),
-                        type:        'success'
-                    };
-                    that.passwordLostModel.unset('email');
-                    that.passwordLostModel.save();
+                if (_.isUndefined(_.singleton.view.notification)) {
+                    _.singleton.view.notification = new NotificationView();
                 }
 
-                if (position !== false) {
-                    options.before_open = function (pnotify) {
-                        pnotify.css({
-                            'top':  position.top,
-                            'left': 810 - pnotify.width()
-                        });
+                _.singleton.view.facebook.getScrollPosition(function (position) {
+                    var options = {
+                        title:       _.t('msg_mail_pwgetnew_title_error'),
+                        description: _.t('msg_mail_pwgetnew_desc_error'),
+                        type:        'error'
                     };
-                    options.position = '';
-                }
 
-                _.singleton.view.notification.setOptions(options, true).show();
+                    if (resp.data.status === 'success') {
+                        options = {
+                            title:       _.t('msg_mail_pwgetnew_title_success'),
+                            description: _.t('msg_mail_pwgetnew_desc_success'),
+                            type:        'success'
+                        };
+                        that.passwordLostModel.unset('email');
+                        that.passwordLostModel.save();
+                    }
 
-                if (resp.data.status === 'success') {
-                    that.goTo('');
+                    if (position !== false) {
+                        options.before_open = function (pnotify) {
+                            pnotify.css({
+                                'top':  position.top,
+                                'left': 810 - pnotify.width()
+                            });
+                        };
+                        options.position = '';
+                    }
+
+                    _.singleton.view.notification.setOptions(options, true).show();
+
+                    if (resp.data.status === 'success') {
+                        that.goTo('');
+                        return that;
+                    }
+
+                    // reset form and button
+                    this.btn_obj.button('reset');
+                    this.form.find('fieldset').prop('disabled', false);
+
                     return that;
-                }
+                });
+                return this;
+            }
+        });
 
-                // reset form and button
-                this.btn_obj.button('reset');
-                this.form.find('fieldset').prop('disabled', false);
-
-                return that;
-            });
-            return this;
-        }
-    });
-
-    return View;
+        return View;
+    }
 });

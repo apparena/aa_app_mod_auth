@@ -4,116 +4,125 @@ define([
     'underscore',
     'backbone',
     'text!modules/auth/templates/passwordLost.html',
-    'modules/optivo/js/views/OptivoView',
-    'modules/auth/js/models/PasswordLostModel'
-], function (View, $, _, Backbone, PasswordLostTemplate, OptivoView, PasswordLostModel) {
+    'jquery.validator_config',
+    'jquery.serialize_object'
+], function (View, $, _, Backbone, PasswordLostTemplate) {
     'use strict';
 
-    View.namespace = 'authPasswordLost';
+    return function () {
+        View.namespace = 'authPasswordLost';
 
-    View.code = Backbone.View.extend({
-        el: $('.content-wrapper'),
+        View.code = Backbone.View.extend({
+            el: $('.content-wrapper'),
 
-        events: {
-            'click #submit-pwlost': 'submit'
-        },
+            events: {
+                'click #submit-pwlost': 'submit'
+            },
 
-        initialize: function () {
-            _.bindAll(this, 'render', 'submit');
-            //this.render();
-        },
+            initialize: function () {
+                _.bindAll(this, 'render', 'submit', 'callbackHandler');
+            },
 
-        render: function () {
-            var that = this,
-                compiledTemplate = _.template(PasswordLostTemplate, {});
-            this.$el.html(compiledTemplate);
+            render: function () {
+                var compiledTemplate = _.template(PasswordLostTemplate, {});
+                this.$el.html(compiledTemplate);
+            },
 
-            _.delay(function () {
-                that.goTo('page/participate/password');
-            }, 500);
-        },
+            submit: function (btn) {
+                this.btn_obj = this.$('#' + btn.target.id);
+                this.form = this.btn_obj.closest('form');
 
-        submit: function (btn) {
-            //_.debug.log('submit form', btn, btn.target.id);
+                var that = this,
+                    form_data = (this.form) ? this.form.serializeObject() : {},
+                    mailSettings = {
+                        'recipient': form_data.email,
+                        'mailtype':  'pwlost'
+                    };
 
-            this.btn_obj = $('#' + btn.target.id);
-            this.form = this.btn_obj.closest('form');
-
-            var that = this,
-                form_data = (this.form) ? this.form.serializeObject() : {},
-                mailSettings = {
-                    'recipient': form_data.email,
-                    'mailtype':  'pwlost'
-                };
-
-            this.form.validate({
-                rules:    {
-                    email: {
-                        required: true,
-                        email:    true
+                this.form.validate({
+                    rules:    {
+                        email: {
+                            required: true,
+                            email:    true
+                        }
+                    },
+                    messages: {
+                        email: {
+                            required: _.t('msg_require_mail'),
+                            email:    _.t('msg_require_mail_format')
+                        }
                     }
-                },
-                messages: {
-                    email: {
-                        required: _.t('msg_require_mail'),
-                        email:    _.t('msg_require_mail_format')
-                    }
-                }
-            });
+                });
 
-            if (this.form.valid()) {
-                this.btn_obj.button('loading');
-                this.form.find('fieldset').prop('disabled', true);
+                if (this.form.valid()) {
+                    this.btn_obj.button('loading');
+                    this.form.find('fieldset').prop('disabled', true);
 
-                if (_.isUndefined(_.singleton.view.optivo)) {
-                    _.singleton.view.optivo = new OptivoView();
+                    require([
+                        'modules/optivo/js/views/OptivoView',
+                        'modules/auth/js/models/PasswordLostModel'
+                    ], function (OptivoView, PasswordLostModel) {
+                        var optivo = OptivoView().init(),
+                            passwordLostModel;
+
+                        optivo.sendTransactionMail(mailSettings, function (resp) {
+                            that.callbackHandler(resp);
+                            passwordLostModel = PasswordLostModel().init({id: 1});
+                            passwordLostModel.set('email', form_data.email);
+                            passwordLostModel.save();
+                        })
+                    });
                 }
-                _.singleton.view.optivo.sendTransactionMail(mailSettings, function (resp) {
-                    that.callbackHandler(resp);
-                    var passwordLostModel = new PasswordLostModel({id: 1});
-                    passwordLostModel.set('email', form_data.email);
-                    passwordLostModel.save();
+            },
+
+            callbackHandler: function (resp) {
+                var that = this;
+                require([
+                    'modules/facebook/js/views/FacebookView',
+                    'modules/notification/js/views/NotificationView'
+                ], function (FacebookView, NotificationView) {
+                    var facebook = FacebookView().init();
+
+                    // define notification position in facebook tabs. works also on normal pages
+                    facebook.getScrollPosition(function (position) {
+                        // define default notification message
+                        var options = {
+                            title:       _.t('msg_mail_pwlost_title_error'),
+                            description: _.t('msg_mail_pwlost_desc_error'),
+                            type:        'error'
+                        };
+
+                        // overwrite message, if status is success
+                        if (resp.data.status === 'success') {
+                            options = {
+                                title:       _.t('msg_mail_pwlost_title_success'),
+                                description: _.t('msg_mail_pwlost_desc_success'),
+                                type:        'success'
+                            };
+                        }
+
+                        // define notification position
+                        if (position !== false) {
+                            options.before_open = function (pnotify) {
+                                pnotify.css({
+                                    'top':  position.top,
+                                    'left': 810 - pnotify.width()
+                                });
+                            };
+                            options.position = '';
+                        }
+
+                        // show notification
+                        NotificationView().init().setOptions(options, true).show();
+
+                        // reset form and button
+                        that.btn_obj.button('reset');
+                        that.form.find('fieldset').prop('disabled', false);
+                    });
                 });
             }
-        },
+        });
 
-        callbackHandler: function (resp) {
-            //_.debug.log('mail versandt, nun alles resetten');
-            var that = this;
-
-            _.singleton.view.facebook.getScrollPosition(function (position) {
-                var options = {
-                    title:       _.t('msg_mail_pwlost_title_error'),
-                    description: _.t('msg_mail_pwlost_desc_error'),
-                    type:        'error'
-                };
-
-                if (resp.data.status === 'success') {
-                    options = {
-                        title:       _.t('msg_mail_pwlost_title_success'),
-                        description: _.t('msg_mail_pwlost_desc_success'),
-                        type:        'success'
-                    };
-                }
-
-                if (position !== false) {
-                    options.before_open = function (pnotify) {
-                        pnotify.css({
-                            'top':  position.top,
-                            'left': 810 - pnotify.width()
-                        });
-                    };
-                    options.position = '';
-                }
-
-                _.singleton.view.notification.setOptions(options, true).show();
-
-                // reset form and button
-                that.btn_obj.button('reset');
-                that.form.find('fieldset').prop('disabled', false);
-            });
-        }
-    });
-
-    return View;
+        return View;
+    }
 });

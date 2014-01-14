@@ -12,7 +12,7 @@ define([
         Model.code = Backbone.Model.extend({
             localStorage: new Backbone.LocalStorage('AppArenaAdventskalenderApp_' + _.aa.instance.i_id + '_UserLogin'),
 
-            defaults:   {
+            defaults: {
                 uid:        '0',
                 gid:        '0',
                 sid:        null,
