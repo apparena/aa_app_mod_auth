@@ -67,10 +67,10 @@ define([
 
                         optivo.sendTransactionMail(mailSettings, function (resp) {
                             that.callbackHandler(resp);
-                            passwordLostModel = PasswordLostModel().init({id: 1});
+                            passwordLostModel = PasswordLostModel().init();
                             passwordLostModel.set('email', form_data.email);
                             passwordLostModel.save();
-                        })
+                        });
                     });
                 }
             },
