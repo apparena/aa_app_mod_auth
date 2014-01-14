@@ -13,7 +13,7 @@ define([
         Collection.code = Backbone.Collection.extend({
             localStorage: new Backbone.LocalStorage('AppArenaAdventskalenderApp_' + _.aa.instance.i_id + '_Participations'),
 
-            model: ParticipateModel,
+            model: ParticipateModel().code,
 
             initialize: function () {
                 this.fetch();
