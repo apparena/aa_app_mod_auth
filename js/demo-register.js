@@ -5,7 +5,7 @@ define(function () {
         var action = type || 'login';
         if (action === 'login') {
             require(['modules/auth/js/views/LoginView'], function (LoginView) {
-                LoginView().init().render().addRedirection('page/auth/demo-register-modal/userdata').renderPage();
+                LoginView().init().render().addRedirection('page/auth/demo-register/userdata').renderPage();
             });
         } else {
             require([
