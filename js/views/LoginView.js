@@ -203,9 +203,9 @@ define([
                         'modules/facebook/js/views/FacebookView',
                         'modules/facebook/js/models/LoginModel'
                     ], function (Facebook, LoginModel) {
-                        that.facebook = Facebook.init();
+                        that.facebook = Facebook().init();
                         that.facebook.addClickEventListener();
-                        that.facebookLoginModel = LoginModel.init();
+                        that.facebookLoginModel = LoginModel().init();
                         that.facebookLoginModel.on('change', that.fbLoginDone, that);
                     });
                 }
@@ -215,9 +215,9 @@ define([
                         'modules/twitter/js/views/TwitterView',
                         'modules/twitter/js/models/LoginModel'
                     ], function (Twitter, LoginModel) {
-                        that.twitter = Twitter.init();
+                        that.twitter = Twitter().init();
                         that.twitter.addClickEventListener();
-                        that.twitterLoginModel = LoginModel.init();
+                        that.twitterLoginModel = LoginModel().init();
                         that.twitterLoginModel.on('change', that.twLoginDone, that);
                     });
                 }
@@ -227,9 +227,9 @@ define([
                         'modules/google/js/views/GoogleView',
                         'modules/google/js/models/LoginModel'
                     ], function (Google, LoginModel) {
-                        that.google = Google.init();
+                        that.google = Google().init();
                         that.google.addClickEventListener();
-                        that.googleLoginModel = LoginModel.init();
+                        that.googleLoginModel = LoginModel().init();
                         that.googleLoginModel.on('change', that.gpLoginDone, that);
                     });
                 }
