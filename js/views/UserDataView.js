@@ -238,7 +238,6 @@ define([
                 require(['modules/optivo/js/views/OptivoView'], function (OptivoView) {
                     var optivo = OptivoView().init();
 
-                    _.debug.log('newsletter', that.user_data_model.get('newsletter'), that.user_data_model.get('optin_nl'));
                     if (that.user_data_model.get('newsletter') !== 'false' && that.user_data_model.get('optin_nl') === '0') {
                         optivo.sendTransactionMail({
                             'recipient': user_data.email,
@@ -248,7 +247,6 @@ define([
                     }
 
                     // send welcome mail if activated
-                    _.debug.log('send welcome mail if activated', _.c('mail_activated'), that.model.get('user_type'));
                     if (_.c('mail_activated') === '1' && that.model.get('user_type') === 'new') {
                         optivo.sendTransactionMail({
                             'recipient': user_data.email,
