@@ -257,6 +257,7 @@ define([
                     // set user_type from new to exist
                     that.model.set('user_type', 'exist');
                     that.model.save();
+                    OptivoView().remove();
                 });
 
                 // close modal if pagetype is modal
