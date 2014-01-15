@@ -3,12 +3,10 @@ define([
     'jquery',
     'underscore',
     'backbone',
-    'modules/auth/js/models/LoginModel',
-    'modules/auth/js/models/UserDataModel',
-    /*'modules/optivo/js/views/OptivoView',*/
+    'modules/auth/js/models/UserDataModel'/*,
     'modules/auth/js/collections/ParticipationCollection',
-    'modules/notification/js/views/NotificationView'
-], function (View, $, _, Backbone, LoginModel, UserDataModel, /*OptivoView,*/ ParticipationCollection, NotificationView) {
+    'modules/notification/js/views/NotificationView'*/
+], function (View, $, _, Backbone, UserDataModel/*, ParticipationCollection, NotificationView*/) {
     'use strict';
 
     return function () {
@@ -131,11 +129,6 @@ define([
                     'email':     email
                 };
 
-               /* // render template and save it global
-                require(['text!modules/auth/templates/userdata_page.html'], function (UserdataTemplate) {
-                    that.template = _.template(UserdataTemplate, data);
-                });*/
-
                 // set status
                 this.status = 'needUserdata';
 
@@ -143,7 +136,8 @@ define([
             },
 
             submit: function () {
-                var form = this.$('#form-participate'),
+                var that = this,
+                    form = this.$('#form-participate'),
                     data = (form) ? form.serializeObject() : {},
                     user_data;
 
@@ -239,36 +233,36 @@ define([
                         user_data: user_data
                     }
                 });
-                /*
-                 // send opt-in mail if newsletter was accepted
-                 if (_.isUndefined(_.singleton.view.optivo)) {
-                 _.singleton.view.optivo = new OptivoView();
-                 }
-                 if (this.user_data_model.get('newsletter') !== 'false' && this.user_data_model.get('optin_nl') === '0') {
-                 _.singleton.view.optivo.sendTransactionMail({
-                 'recipient': user_data.email,
-                 'mailtype':  'nl_optin',
-                 'uid':       _.uid
-                 });
-                 }
 
-                 // send welcome mail if activated
-                 if (_.c('mail_activated') === '1' && _.singleton.model.login.get('user_type') === 'new') {
-                 _.singleton.view.optivo.sendTransactionMail({
-                 'recipient': user_data.email,
-                 'mailtype':  'welcome'
-                 });
-                 }
+                // send opt-in mail if newsletter was accepted
+                require(['modules/optivo/js/views/OptivoView'], function (OptivoView) {
+                    var optivo = OptivoView().init();
 
-                 this.showTerminal();
-                 */
+                    _.debug.log('newsletter', that.user_data_model.get('newsletter'), that.user_data_model.get('optin_nl'));
+                    if (that.user_data_model.get('newsletter') !== 'false' && that.user_data_model.get('optin_nl') === '0') {
+                        optivo.sendTransactionMail({
+                            'recipient': user_data.email,
+                            'mailtype':  'nl_optin',
+                            'uid':       _.uid
+                        });
+                    }
 
-                // set user_type from new to exist
-                this.model.set('user_type', 'exist');
-                this.model.save();
+                    // send welcome mail if activated
+                    _.debug.log('send welcome mail if activated', _.c('mail_activated'), that.model.get('user_type'));
+                    if (_.c('mail_activated') === '1' && that.model.get('user_type') === 'new') {
+                        optivo.sendTransactionMail({
+                            'recipient': user_data.email,
+                            'mailtype':  'welcome'
+                        });
+                    }
+
+                    // set user_type from new to exist
+                    that.model.set('user_type', 'exist');
+                    that.model.save();
+                });
 
                 // close modal if pagetype is modal
-                if(this.pagetype === 'modal') {
+                if (this.pagetype === 'modal') {
                     this.$el.modal('hide');
                 }
 
