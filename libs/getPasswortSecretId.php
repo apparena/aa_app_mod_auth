@@ -29,14 +29,16 @@ try
     $stmt->bindParam(':' . ROW_SECRET, $secret, PDO::PARAM_STR);
     $stmt->execute();
 
-    $return['code'] = '404';
+    $return['code']    = '404';
+    $return['message'] = 'Secret not found in DB. ' . $secret;
+    $return['status']  = 'success';
+
     if ($stmt->rowCount() === 1)
     {
         $secret = $stmt->fetchColumn(0);
         // prepare return data
         $return['code']    = '200';
         $return['message'] = $secret;
-        $return['status']  = 'success';
     }
 }
 catch (Exception $e)

@@ -57,7 +57,7 @@ try
 
     // user not exist, create new entry
     $return['code'] = '404';
-    $return['message'] = 'secret not found';
+    $return['message'] = 'Secret not found in DB. ' . $secret;
 
     if ($stmt->rowCount() === 1)
     {

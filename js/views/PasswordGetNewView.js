@@ -4,9 +4,10 @@ define([
     'underscore',
     'backbone',
     'text!modules/auth/templates/passwordGetNew.html',
-    'modules/notification/js/views/NotificationView',
-    'modules/auth/js/models/PasswordLostModel'
-], function (View, $, _, Backbone, PasswordGetNewTemplate, NotificationView, PasswordLostModel) {
+    'modules/auth/js/models/PasswordLostModel',
+    'jquery.validator_config',
+    'jquery.serialize_object'
+], function (View, $, _, Backbone, PasswordGetNewTemplate, PasswordLostModel) {
     'use strict';
 
     return function () {
@@ -21,36 +22,39 @@ define([
 
             moduleName: 'auth',
 
-            initialize: function () {
+            initialize: function (settings) {
                 _.bindAll(this, 'render', 'redirectToPwLost', 'submit', 'callbackHandler');
 
-                if (_.isUndefined(this.id) || this.id === '') {
+                this.secret = settings.secret || '';
+
+                if (_.isEmpty(this.secret)) {
                     this.redirectToPwLost();
+                    return false;
                 }
+                return this;
             },
 
             render: function () {
-                var that = this,
-                    secret_id = this.ajax({
-                        module: this.moduleName,
-                        action: 'getPasswortSecretId',
-                        secret: this.id
-                    });
-                this.passwordLostModel = new PasswordLostModel({id: 1});
+                var secret_id = this.ajax({
+                    module: this.moduleName,
+                    action: 'getPasswortSecretId',
+                    secret: this.secret
+                });
 
-                if (secret_id.data.message !== this.id) {
+                this.passwordLostModel = PasswordLostModel().init();
+
+                if (secret_id.data.message !== this.secret) {
                     this.redirectToPwLost();
                 }
 
                 this.template = _.template(PasswordGetNewTemplate, {
-                    'secret_id': this.id,
+                    'secret_id': this.secret,
                     'email':     this.passwordLostModel.get('email')
                 });
                 this.$el.html(this.template);
 
-                _.delay(function () {
-                    that.goTo('call/auth-password');
-                }, 500);
+                // redirect to get the same body class like the password call page
+                this.goTo('call/auth-password');
             },
 
             redirectToPwLost: function () {
@@ -59,7 +63,7 @@ define([
             },
 
             submit: function () {
-                this.form = this.$el.find('form');
+                this.form = this.$('form');
                 this.btn_obj = this.form.find('button');
 
                 var that = this,
@@ -70,6 +74,7 @@ define([
                     return that.form.find('#password').val() === value;
                 }, 'Passwords are not the same');
 
+                // define validation requirements
                 this.form.validate({
                     debug: true,
                     rules: {
@@ -102,6 +107,7 @@ define([
                     }
                 });
 
+                // validate and start ajax call on success
                 if (this.form.valid()) {
                     this.btn_obj.button('loading');
                     this.form.find('fieldset').prop('disabled', true);
@@ -117,54 +123,59 @@ define([
             },
 
             callbackHandler: function (resp) {
-                //_.debug.log('mail versandt, nun alles resetten');
                 var that = this;
 
-                if (_.isUndefined(_.singleton.view.notification)) {
-                    _.singleton.view.notification = new NotificationView();
-                }
+                require([
+                    'modules/facebook/js/views/FacebookView',
+                    'modules/notification/js/views/NotificationView'
+                ], function (FacebookView, NotificationView) {
+                    var facebook = FacebookView().init();
 
-                _.singleton.view.facebook.getScrollPosition(function (position) {
-                    var options = {
-                        title:       _.t('msg_mail_pwgetnew_title_error'),
-                        description: _.t('msg_mail_pwgetnew_desc_error'),
-                        type:        'error'
-                    };
-
-                    if (resp.data.status === 'success') {
-                        options = {
-                            title:       _.t('msg_mail_pwgetnew_title_success'),
-                            description: _.t('msg_mail_pwgetnew_desc_success'),
-                            type:        'success'
+                    // define notification position in facebook tabs. works also on normal pages
+                    facebook.getScrollPosition(function (position) {
+                        // define default notification message
+                        var options = {
+                            title:       _.t('msg_mail_pwgetnew_title_error'),
+                            description: _.t('msg_mail_pwgetnew_desc_error'),
+                            type:        'error'
                         };
-                        that.passwordLostModel.unset('email');
-                        that.passwordLostModel.save();
-                    }
 
-                    if (position !== false) {
-                        options.before_open = function (pnotify) {
-                            pnotify.css({
-                                'top':  position.top,
-                                'left': 810 - pnotify.width()
-                            });
-                        };
-                        options.position = '';
-                    }
+                        // overwrite message, if status is success
+                        if (resp.data.status === 'success') {
+                            options = {
+                                title:       _.t('msg_mail_pwgetnew_title_success'),
+                                description: _.t('msg_mail_pwgetnew_desc_success'),
+                                type:        'success'
+                            };
+                            that.passwordLostModel.unset('email');
+                            that.passwordLostModel.save();
+                        }
 
-                    _.singleton.view.notification.setOptions(options, true).show();
+                        // define notification position
+                        if (position !== false) {
+                            options.before_open = function (pnotify) {
+                                pnotify.css({
+                                    'top':  position.top,
+                                    'left': 810 - pnotify.width()
+                                });
+                            };
+                            options.position = '';
+                        }
 
-                    if (resp.data.status === 'success') {
-                        that.goTo('');
+                        // show notification
+                        NotificationView().init().setOptions(options, true).show();
+
+                        if (resp.data.status === 'success') {
+                            that.goTo('');
+                            return that;
+                        }
+
+                        // reset form and button
+                        that.btn_obj.button('reset');
+                        that.form.find('fieldset').prop('disabled', false);
                         return that;
-                    }
-
-                    // reset form and button
-                    this.btn_obj.button('reset');
-                    this.form.find('fieldset').prop('disabled', false);
-
-                    return that;
+                    });
                 });
-                return this;
             }
         });
 
