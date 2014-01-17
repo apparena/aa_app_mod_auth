@@ -4,13 +4,13 @@ define(function () {
     return function (type) {
         var action = type || 'login';
         if (action === 'login') {
-            require(['modules/auth/js/views/LoginView'], function (LoginView) {
+            require(['modules/aa_app_mod_auth/js/views/LoginView'], function (LoginView) {
                 LoginView().init().render().addRedirection('page/auth/demo-register/userdata').renderPage();
             });
         } else {
             require([
-                'modules/auth/js/views/UserDataView',
-                'modules/auth/js/views/LoginView'
+                'modules/aa_app_mod_auth/js/views/UserDataView',
+                'modules/aa_app_mod_auth/js/views/LoginView'
             ], function (UserDataView, LoginView) {
                 var loginView = LoginView().init(),
                     element = $('.content-wrapper'),

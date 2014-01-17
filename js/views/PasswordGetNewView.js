@@ -3,8 +3,8 @@ define([
     'jquery',
     'underscore',
     'backbone',
-    'text!modules/auth/templates/passwordGetNew.html',
-    'modules/auth/js/models/PasswordLostModel',
+    'text!modules/aa_app_mod_auth/templates/passwordGetNew.html',
+    'modules/aa_app_mod_auth/js/models/PasswordLostModel',
     'jquery.validator_config',
     'jquery.serialize_object'
 ], function (View, $, _, Backbone, PasswordGetNewTemplate, PasswordLostModel) {
@@ -126,8 +126,8 @@ define([
                 var that = this;
 
                 require([
-                    'modules/facebook/js/views/FacebookView',
-                    'modules/notification/js/views/NotificationView'
+                    'modules/aa_app_mod_facebook/js/views/FacebookView',
+                    'modules/aa_app_mod_notification/js/views/NotificationView'
                 ], function (FacebookView, NotificationView) {
                     var facebook = FacebookView().init();
 

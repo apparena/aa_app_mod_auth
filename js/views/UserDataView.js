@@ -3,10 +3,8 @@ define([
     'jquery',
     'underscore',
     'backbone',
-    'modules/auth/js/models/UserDataModel'/*,
-    'modules/auth/js/collections/ParticipationCollection',
-    'modules/notification/js/views/NotificationView'*/
-], function (View, $, _, Backbone, UserDataModel/*, ParticipationCollection, NotificationView*/) {
+    'modules/aa_app_mod_auth/js/models/UserDataModel'
+], function (View, $, _, Backbone, UserDataModel) {
     'use strict';
 
     return function () {
@@ -36,7 +34,7 @@ define([
             renderPage: function () {
                 var that = this;
                 this.pagetype = 'page';
-                require(['text!modules/auth/templates/userdata_page.html'], function (UserdataTemplate) {
+                require(['text!modules/aa_app_mod_auth/templates/userdata_page.html'], function (UserdataTemplate) {
                     that.$el.html(_.template(UserdataTemplate, that.userTemplatedata));
                 });
                 this.enableKeypress = true;
@@ -46,7 +44,7 @@ define([
                 var that = this;
                 this.pagetype = 'modal';
                 this.modifyElement($('body'));
-                require(['text!modules/auth/templates/userdata_modal.html'], function (UserdataTemplate) {
+                require(['text!modules/aa_app_mod_auth/templates/userdata_modal.html'], function (UserdataTemplate) {
                     that.$el.append(_.template(UserdataTemplate, that.userTemplatedata));
                     that.modifyElement($('#userdatamodal'));
                     that.$el.modal();
@@ -235,7 +233,7 @@ define([
                 });
 
                 // send opt-in mail if newsletter was accepted
-                require(['modules/optivo/js/views/OptivoView'], function (OptivoView) {
+                require(['modules/aa_app_mod_optivo/js/views/OptivoView'], function (OptivoView) {
                     var optivo = OptivoView().init();
 
                     if (that.user_data_model.get('newsletter') !== 'false' && that.user_data_model.get('optin_nl') === '0') {
