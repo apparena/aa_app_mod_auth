@@ -1,6 +1,6 @@
 define([
     'underscore',
-    'modules/auth/js/views/LoginView'
+    'modules/aa_app_mod_auth/js/views/LoginView'
 ], function (_, LoginView) {
 //test
     'use strict';

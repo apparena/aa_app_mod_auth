@@ -3,7 +3,7 @@ define([
     'jquery',
     'underscore',
     'backbone',
-    'text!modules/auth/templates/passwordLost.html',
+    'text!modules/aa_app_mod_auth/templates/passwordLost.html',
     'jquery.validator_config',
     'jquery.serialize_object'
 ], function (View, $, _, Backbone, PasswordLostTemplate) {
@@ -59,8 +59,8 @@ define([
                     this.form.find('fieldset').prop('disabled', true);
 
                     require([
-                        'modules/optivo/js/views/OptivoView',
-                        'modules/auth/js/models/PasswordLostModel'
+                        'modules/aa_app_mod_optivo/js/views/OptivoView',
+                        'modules/aa_app_mod_auth/js/models/PasswordLostModel'
                     ], function (OptivoView, PasswordLostModel) {
                         var optivo = OptivoView().init(),
                             passwordLostModel;
@@ -78,8 +78,8 @@ define([
             callbackHandler: function (resp) {
                 var that = this;
                 require([
-                    'modules/facebook/js/views/FacebookView',
-                    'modules/notification/js/views/NotificationView'
+                    'modules/aa_app_mod_facebook/js/views/FacebookView',
+                    'modules/aa_app_mod_notification/js/views/NotificationView'
                 ], function (FacebookView, NotificationView) {
                     var facebook = FacebookView().init();
 

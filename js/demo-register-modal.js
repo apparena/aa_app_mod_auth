@@ -4,7 +4,7 @@ define(['underscore'], function (_) {
     return function (type) {
         var action = type || 'login';
         if (action === 'login') {
-            require(['modules/auth/js/views/LoginView'], function (LoginView) {
+            require(['modules/aa_app_mod_auth/js/views/LoginView'], function (LoginView) {
                 var loginView = LoginView().init(),
                     el = loginView.$el;
                 loginView.render().addRedirection('page/auth/demo-register-modal/userdata').renderModal();
@@ -19,8 +19,8 @@ define(['underscore'], function (_) {
             });
         } else {
             require([
-                'modules/auth/js/views/UserDataView',
-                'modules/auth/js/views/LoginView'
+                'modules/aa_app_mod_auth/js/views/UserDataView',
+                'modules/aa_app_mod_auth/js/views/LoginView'
             ], function (UserDataView, LoginView) {
                 var element,
                     loginView = LoginView().init(),
