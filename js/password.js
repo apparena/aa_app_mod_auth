@@ -9,7 +9,7 @@ define([
          $('.modal-backdrop').remove();*/
 
         if (_.isUndefined(id)) {
-            require(['modules/auth/js/views/PasswordLostView'], function (PasswordLostView) {
+            require(['modules/aa_app_mod_auth/js/views/PasswordLostView'], function (PasswordLostView) {
                 PasswordLostView().init().render();
             });
         } else {
@@ -18,7 +18,7 @@ define([
              }
              _.singleton.view['passwordGetNew' + id].render();*/
 
-            require(['modules/auth/js/views/PasswordGetNewView'], function (PasswordGetNewView) {
+            require(['modules/aa_app_mod_auth/js/views/PasswordGetNewView'], function (PasswordGetNewView) {
                 PasswordGetNewView().init({
                     'attributes': {
                         secret: id

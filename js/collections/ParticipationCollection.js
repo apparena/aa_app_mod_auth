@@ -2,7 +2,7 @@ define([
     'CollectionExtend',
     'underscore',
     'backbone',
-    'modules/auth/js/models/ParticipationModel',
+    'modules/aa_app_mod_auth/js/models/ParticipationModel',
     'localstorage'
 ], function (Collection, _, Backbone, ParticipateModel) {
     'use strict';

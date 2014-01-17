@@ -3,8 +3,8 @@ define([
     'jquery',
     'underscore',
     'backbone',
-    'modules/auth/js/models/LoginModel',
-    'text!modules/auth/templates/login.html',
+    'modules/aa_app_mod_auth/js/models/LoginModel',
+    'text!modules/aa_app_mod_auth/templates/login.html',
     'jquery.validator_config',
     'jquery.serialize_object'
 ], function (View, $, _, Backbone, LoginModel, LoginTemplate) {
@@ -69,11 +69,11 @@ define([
                     _.c('login_social_networks').indexOf('twitter') !== -1 ||
                     _.c('login_social_networks').indexOf('fb') !== -1
                     ) {
-                    this.dependencies['showSocialConnect'] = 'text!modules/auth/templates/social_connect.html';
+                    this.dependencies['showSocialConnect'] = 'text!modules/aa_app_mod_auth/templates/social_connect.html';
                 }
 
                 if (_.c('login_social_networks').indexOf('email_password') !== -1) {
-                    this.dependencies['showMailConnect'] = 'text!modules/auth/templates/mail_connect.html';
+                    this.dependencies['showMailConnect'] = 'text!modules/aa_app_mod_auth/templates/mail_connect.html';
                 }
 
                 this.setDoorModalObject();
@@ -97,7 +97,7 @@ define([
 
                 // set page type
                 this.pagetype = 'page';
-                this.dependencies['PageTemplate'] = 'text!modules/auth/templates/login_content_page.html';
+                this.dependencies['PageTemplate'] = 'text!modules/aa_app_mod_auth/templates/login_content_page.html';
 
                 // create dependencie array for require
                 _.each(this.dependencies, function (value) {
@@ -139,7 +139,7 @@ define([
 
                 // set page type
                 this.pagetype = 'modal';
-                this.dependencies['ModalTemplate'] = 'text!modules/auth/templates/login_content_modal.html';
+                this.dependencies['ModalTemplate'] = 'text!modules/aa_app_mod_auth/templates/login_content_modal.html';
 
                 // create dependencie array for require
                 _.each(this.dependencies, function (value) {
@@ -200,8 +200,8 @@ define([
 
                 if (_.c('login_social_networks').indexOf('fb') !== -1) {
                     require([
-                        'modules/facebook/js/views/FacebookView',
-                        'modules/facebook/js/models/LoginModel'
+                        'modules/aa_app_mod_facebook/js/views/FacebookView',
+                        'modules/aa_app_mod_facebook/js/models/LoginModel'
                     ], function (Facebook, LoginModel) {
                         that.facebook = Facebook().init();
                         that.facebook.addClickEventListener();
@@ -212,8 +212,8 @@ define([
 
                 if (_.c('login_social_networks').indexOf('twitter') !== -1) {
                     require([
-                        'modules/twitter/js/views/TwitterView',
-                        'modules/twitter/js/models/LoginModel'
+                        'modules/aa_app_mod_twitter/js/views/TwitterView',
+                        'modules/aa_app_mod_twitter/js/models/LoginModel'
                     ], function (Twitter, LoginModel) {
                         that.twitter = Twitter().init();
                         that.twitter.addClickEventListener();
@@ -224,8 +224,8 @@ define([
 
                 if (_.c('login_social_networks').indexOf('gplus') !== -1) {
                     require([
-                        'modules/google/js/views/GoogleView',
-                        'modules/google/js/models/LoginModel'
+                        'modules/aa_app_mod_google/js/views/GoogleView',
+                        'modules/aa_app_mod_google/js/models/LoginModel'
                     ], function (Google, LoginModel) {
                         that.google = Google().init();
                         that.google.addClickEventListener();
@@ -428,7 +428,7 @@ define([
                         }
                     });
 
-                    require(['modules/notification/js/views/NotificationView'], function (NotificationView) {
+                    require(['modules/aa_app_mod_notification/js/views/NotificationView'], function (NotificationView) {
                         NotificationView().init().setOptions({
                             title:       _.t('msg_login_wrongdata_title'),
                             description: _.t('msg_login_wrongdata_description'),
