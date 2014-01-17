@@ -33,7 +33,7 @@ class Participation extends abstracts\Participation
     const ROW_AUTH_UID           = 'auth_uid';
     const ROW_CODE               = 'code';
     const ROW_DATA               = 'data';
-    const ROW_INSTANCE_ID        = 'aa_inst_id';
+    const ROW_INSTANCE_ID        = 'i_id';
     const PARTICIPATION_LOG_CODE = 1008;
     /**
      * user id
@@ -124,7 +124,7 @@ class Participation extends abstracts\Participation
 
         $uid        = $this->getUid();
         $code       = self::PARTICIPATION_LOG_CODE;
-        $aa_inst_id = $this->getAaInstanceId();
+        $i_id = $this->getAaInstanceId();
 
         $sql = "SELECT
                     " . self::ROW_DATA . "
@@ -140,7 +140,7 @@ class Participation extends abstracts\Participation
         $stmt = $db->prepare($sql);
         $stmt->bindParam(':' . self::ROW_AUTH_UID, $uid, PDO::PARAM_INT);
         $stmt->bindParam(':' . self::ROW_CODE, $code, PDO::PARAM_INT);
-        $stmt->bindParam(':' . self::ROW_INSTANCE_ID, $aa_inst_id, PDO::PARAM_INT);
+        $stmt->bindParam(':' . self::ROW_INSTANCE_ID, $i_id, PDO::PARAM_INT);
         $stmt->execute();
 
         if ($stmt->rowCount() > 0)
@@ -207,7 +207,7 @@ if ((empty($_POST['uid']) || !is_numeric($_POST['uid'])) && (!defined('ENV_MODE'
 
 $settings = array(
     'door'             => $_REQUEST['door_id'],
-    'aa_instance_id'   => $aa_inst_id,
+    'aa_instance_id'   => $i_id,
     'max_particiption' => __c('max_particiption'),
     'uid'              => $_REQUEST['uid']
 );

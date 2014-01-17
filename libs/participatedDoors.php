@@ -25,7 +25,7 @@ try
             FROM
                 " . TBL_MAIN . "
             WHERE
-                aa_inst_id = :aa_inst_id
+                i_id = :i_id
             AND " . ROW_AUTH_UID . " = :" . ROW_AUTH_UID . "
             AND (
                 " . ROW_CODE . " = :" . ROW_CODE . "_participated
@@ -39,7 +39,7 @@ try
     $code_selected_friends = 5001;
 
     $stmt = $db->prepare($sql);
-    $stmt->bindParam(':aa_inst_id', $aa_inst_id, PDO::PARAM_INT);
+    $stmt->bindParam(':i_id', $i_id, PDO::PARAM_INT);
     $stmt->bindParam(':' . ROW_AUTH_UID, $uid, PDO::PARAM_INT);
     $stmt->bindParam(':' . ROW_CODE . '_participated', $code_participated, PDO::PARAM_INT);
     $stmt->bindParam(':' . ROW_CODE . '_selected_friends', $code_selected_friends, PDO::PARAM_INT);

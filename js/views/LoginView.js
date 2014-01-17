@@ -1,417 +1,501 @@
 define([
+    'ViewExtend',
     'jquery',
     'underscore',
     'backbone',
     'modules/auth/js/models/LoginModel',
     'text!modules/auth/templates/login.html',
-    'text!modules/auth/templates/modal.html',
-    'modules/notification/js/views/NotificationView',
-    'modules/facebook/js/views/FacebookView',
-    'modules/twitter/js/views/TwitterView',
-    'modules/google/js/views/GoogleView',
-    'text!modules/auth/templates/social_connect.html',
-    'text!modules/auth/templates/mail_connect.html'
-], function ($, _, Backbone, LoginModel, LoginTemplate, ModalTemplate, NotificationView, Facebook, Twitter, Google, SocialConnectTemplate, MailConnectTemplate) {
-
+    'jquery.validator_config',
+    'jquery.serialize_object'
+], function (View, $, _, Backbone, LoginModel, LoginTemplate) {
     'use strict';
 
-    var namespace = 'authLogin',
-        View, Init, Remove, Instance;
+    return function () {
+        View.namespace = 'authLogin';
 
-    View = Backbone.View.extend({
-        el: $('body'),
+        View.code = Backbone.View.extend({
+            el: $('body'),
 
-        events: {
-            'click #sign-in': 'mailLogin',
-            'keyup :input':   'checkKeypress'
-        },
+            enableKeypress: false,
 
-        tmpUserData: null,
+            redirection: '',
 
-        initialize: function () {
-            _.bindAll(this, 'render', 'loginProcess', 'mailLogin', 'fbLoginDone', 'twLoginDone', 'gpLoginDone');
+            events: {
+                'click #sign-in': 'mailLogin',
+                'keyup :input':   'checkKeypress'
+            },
 
-            this.loginModel = LoginModel.init({
-                id: 1
-            });
-            this.loginModel.on('change:uid', this.handleNavigation, this);
+            tmpUserData: null,
 
-            this.notification = NotificationView.init();
+            initialize: function () {
+                _.bindAll(this, 'render', 'setDoorModalObject', 'addRedirection', 'renderModal', 'openModal', 'renderPage', 'loginProcess', 'addSocialLogin', 'mailLogin', 'fbLoginDone', 'twLoginDone', 'gpLoginDone');
 
-            this.data = {
-                'modal_id':   'sign-up-modal',
-                'headline':   _.t('login_headline'),
-                'show_close': true,
-                'buttons':    {
-                    /*'cancel': {
-                     'btn_class': 'back pull-left',
-                     'btn_id':    'cancel-login',
-                     'btn_text':  _.t('back'),
-                     'btn_type':  'link',
-                     'data':      'data-dismiss=modal'
-                     },*/
-                    'next': {
-                        'btn_class': 'btn-primary sign-in',
-                        'btn_id':    'sign-in',
-                        'btn_text':  _.t('login'),
-                        'btn_type':  'button',
-                        'data':      'data-loading-text="' + _.t('loading') + ' ' + _.escape('<i class="icon-spinner icon-spin"></i>') + '"'
+                this.loginModel = LoginModel().init({
+                    id: 1
+                });
+                this.loginModel.on('change:uid', this.handleNavigation, this);
+
+                this.data = {
+                    'modal_id':   'sign-up-modal',
+                    'headline':   _.t('login_headline'),
+                    'show_close': true,
+                    'buttons':    {
+                        /*'cancel': {
+                         'btn_class': 'back pull-left',
+                         'btn_id':    'cancel-login',
+                         'btn_text':  _.t('back'),
+                         'btn_type':  'link',
+                         'data':      'data-dismiss=modal'
+                         },*/
+                        'next': {
+                            'btn_class': 'btn-primary sign-in',
+                            'btn_id':    'sign-in',
+                            'btn_text':  _.t('login'),
+                            'btn_type':  'button',
+                            'data':      'data-loading-text="' + _.t('loading') + ' ' + _.escape('<i class="icon-spinner icon-spin"></i>') + '"'
+                        }
                     }
+                };
+            },
+
+            render: function () {
+                // set/revert basic element
+                this.setElement($('body'));
+                var showSocialConnect = '', showMailConnect = '';
+
+                this.dependencies = {};
+
+                if (_.c('login_social_networks').indexOf('gplus') !== -1 ||
+                    _.c('login_social_networks').indexOf('twitter') !== -1 ||
+                    _.c('login_social_networks').indexOf('fb') !== -1
+                    ) {
+                    this.dependencies['showSocialConnect'] = 'text!modules/auth/templates/social_connect.html';
                 }
-            };
-        },
 
-        render: function () {
-            var compiledModalTemplate = _.template(ModalTemplate, this.data),
-                compiledMailConnectTemplate = _.template(MailConnectTemplate, {}),
-                compiledSocialConnectTemplate = _.template(SocialConnectTemplate, {}),
-                compiledFormTemplate, showSocialConnect = '', showMailConnect = '';
+                if (_.c('login_social_networks').indexOf('email_password') !== -1) {
+                    this.dependencies['showMailConnect'] = 'text!modules/auth/templates/mail_connect.html';
+                }
 
-            if (_.c('login_social_networks').indexOf('gplus') !== -1 ||
-                _.c('login_social_networks').indexOf('twitter') !== -1 ||
-                _.c('login_social_networks').indexOf('fb') !== -1
-                ) {
-                showSocialConnect = compiledSocialConnectTemplate;
-            }
-
-            if (_.c('login_social_networks').indexOf('email_password') !== -1) {
-                showMailConnect = compiledMailConnectTemplate;
-            }
-
-            compiledFormTemplate = _.template(LoginTemplate, {
-                showMailConnect:   showMailConnect,
-                showSocialConnect: showSocialConnect
-            });
-
-            this.setDoorModalObject();
-            if (typeof this.modal_obj === 'undefined' || this.modal_obj.length === 0) {
-                this.$el.append(compiledModalTemplate);
-                this.$el.find('#' + this.data.modal_id).find('.modal-body-wrapper').append(compiledFormTemplate);
                 this.setDoorModalObject();
-            }
-            return this;
-        },
+                this.enableKeypress = true;
+                return this;
+            },
 
-        setDoorModalObject: function () {
-            this.modal_obj = $('#' + this.data.modal_id);
-        },
+            setDoorModalObject: function () {
+                this.modal_obj = $('#' + this.data.modal_id);
+                return this;
+            },
 
-        openModal: function () {
-            var that = this;
-            this.modal_obj.on('shown.bs.modal', function () {
-                that.modal_obj.find('input').first().focus();
-                $('#comment-box').hide();
-            });
+            addRedirection: function (redirection) {
+                this.redirection = redirection || '';
+                return this;
+            },
 
-            this.modal_obj.modal('show');
+            renderPage: function () {
+                var that = this,
+                    dependencies = [];
 
-            this.facebook = Facebook.init();
-            this.facebook.addClickEventListener();
-            _.singleton.model.fbLogin.on('change', this.fbLoginDone, this);
+                // set page type
+                this.pagetype = 'page';
+                this.dependencies['PageTemplate'] = 'text!modules/auth/templates/login_content_page.html';
 
-            this.twitter = Twitter.init();
-            this.twitter.addClickEventListener();
-            _.singleton.model.twLogin.on('change', this.twLoginDone, this);
+                // create dependencie array for require
+                _.each(this.dependencies, function (value) {
+                    dependencies.push(value);
+                });
 
-            this.google = Google.init();
-            this.google.addClickEventListener();
-            _.singleton.model.gpLogin.on('change', this.gpLoginDone, this);
+                require(dependencies, function () {
+                    var compiledPageTemplate, compiledFormTemplate, showMailConnect, showSocialConnect, PageTemplate;
 
-            this.goTo('call/login');
-        },
+                    // handle function arguments
+                    _.each(that.dependencies, function (value, key) {
+                        if (key === 'PageTemplate') {
+                            PageTemplate = require(value);
+                        } else if (key === 'showSocialConnect') {
+                            showSocialConnect = require(value);
+                        } else if (key === 'showMailConnect') {
+                            showMailConnect = require(value);
+                        }
+                    });
 
-        fbLoginDone: function () {
-            // store some fb data in login model
-            this.loginModel.set({
-                login_type: _.singleton.model.fbLogin.get('login_type'),
-                sid:        _.singleton.model.fbLogin.get('fbid'),
-                email:      _.singleton.model.fbLogin.get('email'),
-                password:   '',
-                avatar:     'https://graph.facebook.com/' + _.singleton.model.fbLogin.get('fbid') + '/picture?width=40&height=40'
-            });
+                    compiledPageTemplate = _.template(PageTemplate, that.data);
+                    compiledFormTemplate = _.template(LoginTemplate, {
+                        showMailConnect:   _.template(showSocialConnect, {}),
+                        showSocialConnect: _.template(showMailConnect, {})
+                    });
 
-            this.loginProcess();
-            return this;
-        },
+                    // add content and define new element
+                    that.$('.content-wrapper').html(compiledPageTemplate);
+                    that.setElement(that.$('.content-wrapper'));
+                    that.$('.login-body').append(compiledFormTemplate);
+                    that.addSocialLogin();
+                });
+                return this;
+            },
 
-        twLoginDone: function () {
-            // store some tw data in login model
-            this.loginModel.set({
-                login_type: _.singleton.model.twLogin.get('login_type'),
-                sid:        _.singleton.model.twLogin.get('twid'),
-                email:      _.singleton.model.twLogin.get('email'),
-                //email:      '',
-                password:   '',
-                avatar:     _.singleton.model.twLogin.get('avatar')
-            });
+            renderModal: function () {
+                var that = this,
+                    dependencies = [];
 
-            this.loginProcess();
-            return this;
-        },
+                // set page type
+                this.pagetype = 'modal';
+                this.dependencies['ModalTemplate'] = 'text!modules/auth/templates/login_content_modal.html';
 
-        gpLoginDone: function () {
-            // store some gp data in login model
-            this.loginModel.set({
-                login_type: _.singleton.model.gpLogin.get('login_type'),
-                sid:        _.singleton.model.gpLogin.get('gpid'),
-                //email:      _.singleton.model.gpLogin.get('email'),
-                email:      '',
-                password:   '',
-                avatar:     _.singleton.model.gpLogin.get('avatar')
-            });
+                // create dependencie array for require
+                _.each(this.dependencies, function (value) {
+                    dependencies.push(value);
+                });
 
-            this.loginProcess();
-            return this;
-        },
+                require(dependencies, function () {
+                    var compiledModalTemplate, compiledFormTemplate, showMailConnect, showSocialConnect, ModalTemplate;
 
-        mailLogin: function (element) {
-            // get form data
-            var form = $('#form-sign-up'),
-                data = (form) ? form.serializeObject() : {};
+                    // handle function arguments
+                    _.each(that.dependencies, function (value, key) {
+                        if (key === 'ModalTemplate') {
+                            ModalTemplate = require(value);
+                        } else if (key === 'showSocialConnect') {
+                            showSocialConnect = require(value);
+                        } else if (key === 'showMailConnect') {
+                            showMailConnect = require(value);
+                        }
+                    });
 
-            this.btn = $(element.currentTarget);
+                    compiledModalTemplate = _.template(ModalTemplate, that.data);
 
-            form.validate({
-                //debug: true,
-                rules: {
-                    mail: {
-                        required: true,
-                        email:    true
-                    },
-
-                    password: {
-                        required:  true,
-                        minlength: 3
+                    that.setDoorModalObject();
+                    if (typeof that.modal_obj === 'undefined' || that.modal_obj.length === 0) {
+                        compiledFormTemplate = _.template(LoginTemplate, {
+                            showMailConnect:   _.template(showSocialConnect, {}),
+                            showSocialConnect: _.template(showMailConnect, {})
+                        });
+                        // add content and define new element
+                        that.$el.append(compiledModalTemplate);
+                        that.setElement(that.$('#' + that.data.modal_id));
+                        that.$('.modal-body-wrapper').append(compiledFormTemplate);
+                        that.setDoorModalObject();
                     }
-                },
 
-                messages: {
-                    mail: {
-                        required: _.t('msg_require_mail'),
-                        email:    _.t('msg_require_mail_format')
-                    },
+                    that.openModal();
+                });
+                return this;
+            },
 
-                    password: {
-                        required:  _.t('msg_require_password'),
-                        minlength: jQuery.format(_.t('msg_require_password_format'))
-                    }
+            openModal: function () {
+                var that = this;
+
+                // set focus on first input field
+                this.modal_obj.on('shown.bs.modal', function () {
+                    that.modal_obj.find('input').first().focus();
+                    //$('#comment-box').hide();
+                });
+
+                this.modal_obj.modal('show');
+                this.addSocialLogin();
+
+                this.goTo('call/login/modal');
+            },
+
+            addSocialLogin: function () {
+                var that = this;
+
+                if (_.c('login_social_networks').indexOf('fb') !== -1) {
+                    require([
+                        'modules/facebook/js/views/FacebookView',
+                        'modules/facebook/js/models/LoginModel'
+                    ], function (Facebook, LoginModel) {
+                        that.facebook = Facebook().init();
+                        that.facebook.addClickEventListener();
+                        that.facebookLoginModel = LoginModel().init();
+                        that.facebookLoginModel.on('change', that.fbLoginDone, that);
+                    });
                 }
-            });
 
-            // return if is_valid is false
-            if (!form.valid()) {
-                this.log('action', 'user_participate_login_validation', {
-                    auth_uid:      _.uid,
-                    auth_uid_temp: _.uid_temp,
-                    code:          1001,
-                    data_obj:      {
-                        message: 'empty fields'
+                if (_.c('login_social_networks').indexOf('twitter') !== -1) {
+                    require([
+                        'modules/twitter/js/views/TwitterView',
+                        'modules/twitter/js/models/LoginModel'
+                    ], function (Twitter, LoginModel) {
+                        that.twitter = Twitter().init();
+                        that.twitter.addClickEventListener();
+                        that.twitterLoginModel = LoginModel().init();
+                        that.twitterLoginModel.on('change', that.twLoginDone, that);
+                    });
+                }
+
+                if (_.c('login_social_networks').indexOf('gplus') !== -1) {
+                    require([
+                        'modules/google/js/views/GoogleView',
+                        'modules/google/js/models/LoginModel'
+                    ], function (Google, LoginModel) {
+                        that.google = Google().init();
+                        that.google.addClickEventListener();
+                        that.googleLoginModel = LoginModel().init();
+                        that.googleLoginModel.on('change', that.gpLoginDone, that);
+                    });
+                }
+            },
+
+            fbLoginDone: function () {
+                // store some fb data in login model
+                this.loginModel.set({
+                    login_type: this.facebookLoginModel.get('login_type'),
+                    sid:        this.facebookLoginModel.get('fbid'),
+                    email:      this.facebookLoginModel.get('email'),
+                    password:   '',
+                    avatar:     'https://graph.facebook.com/' + this.facebookLoginModel.get('fbid') + '/picture?width=40&height=40'
+                });
+
+                this.loginProcess();
+                return this;
+            },
+
+            twLoginDone: function () {
+                // store some tw data in login model
+                this.loginModel.set({
+                    login_type: this.twitterLoginModel.get('login_type'),
+                    sid:        this.twitterLoginModel.get('twid'),
+                    email:      this.twitterLoginModel.get('email'),
+                    //email:      '',
+                    password:   '',
+                    avatar:     this.twitterLoginModel.get('avatar')
+                });
+
+                this.loginProcess();
+                return this;
+            },
+
+            gpLoginDone: function () {
+                // store some gp data in login model
+                this.loginModel.set({
+                    login_type: this.googleLoginModel.get('login_type'),
+                    sid:        this.googleLoginModel.get('gpid'),
+                    //email:      this.googleLoginModel.get('email'),
+                    email:      '',
+                    password:   '',
+                    avatar:     this.googleLoginModel.get('avatar')
+                });
+
+                this.loginProcess();
+                return this;
+            },
+
+            mailLogin: function (element) {
+                // get form data
+                var form = $('#form-sign-up'),
+                    data = (form) ? form.serializeObject() : {};
+
+                this.btn = $(element.currentTarget);
+
+                form.validate({
+                    //debug: true,
+                    rules: {
+                        mail: {
+                            required: true,
+                            email:    true
+                        },
+
+                        password: {
+                            required:  true,
+                            minlength: 3
+                        }
+                    },
+
+                    messages: {
+                        mail: {
+                            required: _.t('msg_require_mail'),
+                            email:    _.t('msg_require_mail_format')
+                        },
+
+                        password: {
+                            required:  _.t('msg_require_password'),
+                            minlength: $.format(_.t('msg_require_password_format'))
+                        }
                     }
                 });
-                return false;
-            }
 
-            // set button to loading state
-            this.btn.button('loading');
-
-            /**
-             * ok all is right, now check login data in database
-             */
-            this.loginModel.set({
-                email:    data.mail,
-                password: data.password
-            });
-
-            this.loginProcess();
-            return this;
-        },
-
-        loginProcess: function () {
-            var that = this;
-
-            // start login process and handle data
-            this.ajax(this.loginModel.attributes, true, function (return_data) {
-                // remove important data from model attributes
-                that.loginModel.unset('password');
-
-                // reset login button
-                if (typeof that.btn !== 'undefined') {
-                    that.btn.button('reset');
+                // return if is_valid is false
+                if (!form.valid()) {
+                    this.log('action', 'user_participate_login_validation', {
+                        auth_uid:      _.uid,
+                        auth_uid_temp: _.uid_temp,
+                        code:          1001,
+                        data_obj:      {
+                            message: 'empty fields'
+                        }
+                    });
+                    return false;
                 }
 
-                if (return_data.type === 'success') {
-                    that.successOnCheck(return_data.data);
+                // set button to loading state
+                this.btn.button('loading');
+
+                /**
+                 * ok all is right, now check login data in database
+                 */
+                this.loginModel.set({
+                    email:    data.mail,
+                    password: data.password
+                });
+
+                this.loginProcess();
+                return this;
+            },
+
+            loginProcess: function () {
+                var that = this;
+
+                // start login process and handle data
+                this.ajax(this.loginModel.attributes, true, function (return_data) {
+                    // remove important data from model attributes
+                    that.loginModel.unset('password');
+
+                    // reset login button
+                    if (typeof that.btn !== 'undefined') {
+                        that.btn.button('reset');
+                    }
+
+                    if (return_data.type === 'success') {
+                        that.successOnCheck(return_data.data);
+                    } else {
+                        _.debug.error('error, code 100', 'login error in loginProcess');
+                        that.log('action', 'user_participated_error', {
+                            auth_uid:      _.uid,
+                            auth_uid_temp: _.uid_temp,
+                            code:          1011,
+                            data_obj:      {
+                                error_code: '100'
+                            }
+                        });
+                    }
+                });
+            },
+
+            successOnCheck: function (data) {
+                var that = this,
+                    user_type = 'exist';
+                this.setDoorModalObject();
+
+                // refresh global user id
+                _.uid = parseInt(data.message, 10);
+
+                if (data.code === '200' || data.code === '201') {
+                    if (data.code === '201') {
+                        user_type = 'new';
+                    }
+
+                    this.tmpUserData = data.user_data;
+                    this.tmpUserData.additional = JSON.parse(this.tmpUserData.additional);
+
+                    // save user login information into local storage
+                    this.loginModel.set({
+                        uid:       _.uid,
+                        avatar:    data.avatar,
+                        gid:       0,
+                        user_type: user_type,
+                        tmp:       this.tmpUserData
+                    });
+                    this.loginModel.save();
+
+                    this.log('action', 'user_participate_login_successfully', {
+                        auth_uid:      _.uid,
+                        auth_uid_temp: _.uid_temp,
+                        code:          1002,
+                        data_obj:      {
+                            code:    data.code,
+                            message: data.message
+                        }
+                    });
+
+                    if (this.pagetype === 'modal') {
+                        // close login modal
+                        this.modal_obj.modal('hide');
+                        if(!_.isEmpty(this.redirection)) {
+                            this.goTo(this.redirection);
+                        }
+                    } else {
+                        this.goTo(this.redirection);
+                    }
+                    this.enableKeypress = false;
+                } else if (data.code === '203') {
+                    // wrong password
+                    this.log('action', 'user_participate_login_wrong', {
+                        auth_uid:      _.uid,
+                        auth_uid_temp: _.uid_temp,
+                        code:          1004,
+                        data_obj:      {
+                            code:    data.code,
+                            message: data.message
+                        }
+                    });
+
+                    require(['modules/notification/js/views/NotificationView'], function (NotificationView) {
+                        NotificationView().init().setOptions({
+                            title:       _.t('msg_login_wrongdata_title'),
+                            description: _.t('msg_login_wrongdata_description'),
+                            type:        'notice'
+                        }).show();
+                    });
                 } else {
-                    _.debug.error('error, code 100', 'login error in loginProcess');
-                    that.log('action', 'user_participated_error', {
+                    // critical other error
+                    this.log('action', 'user_participate_login_error', {
+                        auth_uid:      _.uid,
+                        auth_uid_temp: _.uid_temp,
+                        code:          1005,
+                        data_obj:      {
+                            code:    0,
+                            message: 'some went wrong, but I don\'t know what exactly - ' + data.message
+                        }
+                    });
+
+                    _.debug.error('code 200', 'critical error on login');
+                    this.log('action', 'user_participated_error', {
                         auth_uid:      _.uid,
                         auth_uid_temp: _.uid_temp,
                         code:          1011,
                         data_obj:      {
-                            error_code: '100'
+                            error_code: '200'
                         }
                     });
                 }
-            });
-        },
+            },
 
-        successOnCheck: function (data) {
-            var that = this,
-                user_type = 'exist';
-            this.setDoorModalObject();
+            handleNavigation: function () {
+                this.loginModel.fetch();
+                var nav = $('.navbar-nav'),
+                    admins = ',' + _.c('admin_mails').replace(/ /g, '') + ',',
+                    uid = this.loginModel.get('uid'),
+                    login_type = this.loginModel.get('login_type');
 
-            // refresh global user id
-            _.uid = parseInt(data.message, 10);
+                // save uid global
+                _.uid = parseInt(uid, 10);
+                if (_.isNumber(uid) && (uid > 0/* || login_type === 'fbuser'*/)) {
+                    nav.find('#nav-login').addClass('hide').end().find('.nav-logout').removeClass('hide');
+                    $('.nav-profile').removeClass('hide').find('img').attr('src', this.loginModel.get('avatar'));
 
-            if (data.code === '200' || data.code === '201') {
-                if (data.code === '201') {
-                    user_type = 'new';
+                    // if admin, show adminpanel button
+                    if (admins.indexOf(',' + this.loginModel.get('email') + ',') !== -1) {
+                        nav.find('#nav-admin').removeClass('hide');
+                        _.gid = 1;
+                        $('.admin-fb-info').hide();
+                    }
+                } else {
+                    // change status to loged out
+                    nav.find('#nav-login').removeClass('hide').end().find('#nav-admin').addClass('hide').end().find('.nav-logout').addClass('hide');
+                    $('.nav-profile').addClass('hide');
                 }
+                return this;
+            },
 
-                this.tmpUserData = data.user_data;
-                this.tmpUserData.additional = JSON.parse(this.tmpUserData.additional);
-
-                // save user login information into local storage
-                this.loginModel.set({
-                    uid:       _.uid,
-                    avatar:    data.avatar,
-                    gid:       0,
-                    user_type: user_type,
-                    tmp:       this.tmpUserData
-                });
-                this.loginModel.save();
-
-                this.log('action', 'user_participate_login_successfully', {
-                    auth_uid:      _.uid,
-                    auth_uid_temp: _.uid_temp,
-                    code:          1002,
-                    data_obj:      {
-                        code:    data.code,
-                        message: data.message
-                    }
-                });
-
-                // close login modal
-                $('#comment-box').show();
-                this.modal_obj.on('hidden.bs.modal', function () {
-                    that.modal_obj.remove();
-                });
-                this.modal_obj.modal('hide');
-            } else if (data.code === '203') {
-                // wrong password
-                this.log('action', 'user_participate_login_wrong', {
-                    auth_uid:      _.uid,
-                    auth_uid_temp: _.uid_temp,
-                    code:          1004,
-                    data_obj:      {
-                        code:    data.code,
-                        message: data.message
-                    }
-                });
-                this.notice_prperties = {
-                    title:       _.t('msg_login_wrongdata_title'),
-                    description: _.t('msg_login_wrongdata_description'),
-                    type:        'notice'
-                };
-                this.notification.setOptions(this.notice_prperties).show();
-            } else {
-                // critical other error
-                this.log('action', 'user_participate_login_error', {
-                    auth_uid:      _.uid,
-                    auth_uid_temp: _.uid_temp,
-                    code:          1005,
-                    data_obj:      {
-                        code:    0,
-                        message: 'some went wrong, but I don\'t know what exactly - ' + data.message
-                    }
-                });
-                /*this.notice_prperties = {
-                 title:       _.t('msg_login_error_title') + ' - Code 200',
-                 description: _.t('msg_login_error_description'),
-                 type:        'error'
-                 };
-                 this.notification.setOptions(this.notice_prperties).show();*/
-
-                _.debug.error('error, code 200');
-                this.log('action', 'user_participated_error', {
-                    auth_uid:      _.uid,
-                    auth_uid_temp: _.uid_temp,
-                    code:          1011,
-                    data_obj:      {
-                        error_code: '200'
-                    }
-                });
-            }
-        },
-
-        handleNavigation: function () {
-            //_.debug.log('handleNavigation');
-            this.loginModel.fetch();
-            var nav = $('.navbar-nav'),
-                admins = ',' + _.c('admin_mails').replace(/ /g, '') + ',',
-                uid = this.loginModel.get('uid'),
-                login_type = this.loginModel.get('login_type');
-
-            // save uid global
-            _.uid = parseInt(uid, 10);
-
-            if (_(uid).isBlank() === false && (uid > 0 || login_type === 'fbuser')) {
-                nav.find('#nav-login').addClass('hide').end().find('.nav-logout').removeClass('hide');
-                $('.nav-profile').removeClass('hide').find('img').attr('src', this.loginModel.get('avatar'));
-
-                // if admin, show adminpanel button
-                if (admins.indexOf(',' + this.loginModel.get('email') + ',') !== -1) {
-                    nav.find('#nav-admin').removeClass('hide');
-                    _.gid = 1;
-                    $('.admin-fb-info').hide();
+            checkKeypress: function (event) {
+                var key = event.keyCode || event.which,
+                    btn;
+                if (key === 13 && this.enableKeypress === true) {
+                    btn = $('.modal').find('button#sign-in');
+                    this.mailLogin(btn);
                 }
-            } else {
-                // change status to loged out
-                nav.find('#nav-login').removeClass('hide').end().find('#nav-admin').addClass('hide').end().find('.nav-logout').addClass('hide');
-                $('.nav-profile').addClass('hide');
             }
-            return this;
-        },
+        });
 
-        checkKeypress: function (event) {
-            var key = event.keyCode || event.which,
-                btn;
-            //_.debug.log(key);
-            if (key === 13) {
-                btn = $('.modal').find('button#sign-in');
-                this.mailLogin(btn);
-            }
-        }
-    });
-
-    Remove = function () {
-        _.singleton.view[namespace].unbind().remove();
-        delete _.singleton.view[namespace];
-    };
-
-    Init = function (init) {
-
-        if (_.isUndefined(_.singleton.view[namespace])) {
-            _.singleton.view[namespace] = new View();
-        } else {
-            if (!_.isUndefined(init) && init === true) {
-                Remove();
-                _.singleton.view[namespace] = new View();
-            }
-        }
-
-        return _.singleton.view[namespace];
-    };
-
-    Instance = function () {
-        return _.singleton.view[namespace];
-    };
-
-    return {
-        init:        Init,
-        view:        View,
-        remove:      Remove,
-        namespace:   namespace,
-        getInstance: Instance
-    };
+        return View;
+    }
 });

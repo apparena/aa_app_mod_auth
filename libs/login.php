@@ -41,7 +41,7 @@ try
     else
     {
         // set randome password, this is a social login
-        $password = md5(time() . $email . uniqid() . $aa_inst_id);
+        $password = md5(time() . $email . uniqid() . $i_id);
     }
 
     $return['user_data'] = array(
@@ -62,7 +62,7 @@ try
                 " . TBL_DATA . " AS data
                 ON data." . ROW_AUTH_UID . " = user." . ROW_UID . "
             WHERE
-                aa_inst_id = :aa_inst_id
+                i_id = :i_id
             AND " . ROW_USER . " = :" . ROW_USER . "
             LIMIT 1
             ";
@@ -70,12 +70,12 @@ try
     $user = null;
 
     $stmt = $db->prepare($sql);
-    $stmt->bindParam(':aa_inst_id', $aa_inst_id, PDO::PARAM_INT);
+    $stmt->bindParam(':i_id', $i_id, PDO::PARAM_INT);
     $stmt->bindParam(':' . ROW_USER, $email, PDO::PARAM_STR);
     $stmt->execute();
 
     // get password class
-    $file = ROOT_PATH . DS . 'libs' . DS . 'AppArena' . DS . 'Utils' . DS . 'User' . DS . 'Password' . DS . 'class.password.php';
+    $file = ROOT_PATH . DS . 'libs' . DS . 'AppArena' . DS . 'User' . DS . 'class.password.php';
     if (!file_exists($file))
     {
         throw new \Exception('File ' . $file . ' doesn\'t exist in ' . __FILE__);
@@ -103,7 +103,7 @@ try
         $sql = "INSERT INTO
                 " . TBL_MAIN . "
                 SET
-                    aa_inst_id = :aa_inst_id,
+                    i_id = :i_id,
                     " . ROW_USER . " = :" . ROW_USER . ",
                     " . ROW_TOKEN . " = :" . ROW_TOKEN . ",
                     " . ROW_FB_ID . " = :" . ROW_FB_ID . ",
@@ -119,7 +119,7 @@ try
 
         // prepare query elements
         $stmt = $db->prepare($sql);
-        $stmt->bindParam(':aa_inst_id', $aa_inst_id, PDO::PARAM_INT);
+        $stmt->bindParam(':i_id', $i_id, PDO::PARAM_INT);
         $stmt->bindParam(':' . ROW_USER, $email, PDO::PARAM_STR);
         $stmt->bindParam(':' . ROW_TOKEN, $token, PDO::PARAM_STR, 60);
         $stmt->bindParam(':' . ROW_FB_ID, $fb_id, PDO::PARAM_INT);
@@ -164,12 +164,12 @@ try
                     " . TBL_DATA . " AS data
                     ON data." . ROW_AUTH_UID . " = user." . ROW_UID . "
                 WHERE
-                    aa_inst_id = :aa_inst_id
+                    i_id = :i_id
                 AND " . ROW_USER . " = :" . ROW_USER . "
                 LIMIT 1
                ";
         $stmt = $db->prepare($sql);
-        $stmt->bindParam(':aa_inst_id', $aa_inst_id, PDO::PARAM_INT);
+        $stmt->bindParam(':i_id', $i_id, PDO::PARAM_INT);
         $stmt->bindParam(':' . ROW_USER, $email, PDO::PARAM_STR);
         $stmt->execute();
         $user = $stmt->fetchObject();

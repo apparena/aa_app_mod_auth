@@ -18,7 +18,7 @@ try
     $sql = "SELECT
                 " . ROW_ADDITIONAL . "
             WHERE
-                aa_inst_id = :aa_inst_id
+                i_id = :i_id
             AND " . ROW_AUTH_UID . " = :" . ROW_AUTH_UID . "
             LIMIT 1
             ";
@@ -29,7 +29,7 @@ try
     // prepare db statement and bind data
     $stmt = $db->prepare($sql);
     $stmt->bindParam(':' . ROW_AUTH_UID, $data[ROW_AUTH_UID], PDO::PARAM_INT);
-    $stmt->bindParam(':aa_inst_id', $aa_inst_id, PDO::PARAM_INT);
+    $stmt->bindParam(':i_id', $i_id, PDO::PARAM_INT);
 
     if ($stmt->execute())
     {

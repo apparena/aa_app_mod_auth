@@ -57,12 +57,12 @@ try
 
     // user not exist, create new entry
     $return['code'] = '404';
-    $return['message'] = 'secret not found';
+    $return['message'] = 'Secret not found in DB. ' . $secret;
 
     if ($stmt->rowCount() === 1)
     {
         // get password class
-        $file = ROOT_PATH . DS . 'libs' . DS . 'AppArena' . DS . 'Utils' . DS . 'User' . DS . 'Password' . DS . 'class.password.php';
+        $file = ROOT_PATH . DS . 'libs' . DS . 'AppArena' . DS . 'User' . DS . 'class.password.php';
         if (!file_exists($file))
         {
             throw new \Exception('File ' . $file . ' doesn\'t exist in ' . __FILE__);

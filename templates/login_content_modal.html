@@ -7,7 +7,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                     <% }
 
-                    if(typeof headline !== 'undefined' && _(headline).isBlank() === false) { %>
+                    if(typeof headline !== 'undefined' && _.isEmpty(headline) === false) { %>
                     <h3><%= headline %></h3>
                     <% } %>
                 </div>

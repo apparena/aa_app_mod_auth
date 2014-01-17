@@ -1,18 +1,19 @@
 define([
-    'underscore',
     'modules/auth/js/views/LoginView'
-], function (_, LoginView) {
-//test
+], function (LoginView) {
     'use strict';
 
     return function () {
-        var loginView = LoginView.init();
-        loginView.render().openModal();
+        var loginView = LoginView().init(),
+            el = loginView.$el;
+        loginView.render().renderModal();
+        // hide comment box to disable problems in IE
         $('#comment-box').hide();
-        loginView.modal_obj.on('hidden.bs.modal', function () {
+        // set eventlistener to modal hide
+        el.on('hidden.bs.modal', function () {
+            el.off('hidden.bs.modal');
             $('#comment-box').show();
-            loginView.destroy();
-            delete _.singleton.view.login;
+            LoginView().remove();
         });
     };
 });

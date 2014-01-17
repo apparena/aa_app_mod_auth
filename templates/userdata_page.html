@@ -1,0 +1,142 @@
+<h3><%= _.t('userdata_headline') %></h3>
+<h4><%= _.t('userdata_subline') %></h4>
+
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        <%= _.t('register_description') %>
+    </div>
+</div>
+
+<h4><%= _.t('register_subheadline') %></h4>
+
+<form id="form-participate" class="form-horizontal" role="form" onsubmit="return false;">
+    <div class="form-group">
+        <label for="email" class="col-xs-12 col-sm-3 control-label"><%= _.t('email') %> *</label>
+
+        <div class="col-xs-12 col-sm-9">
+            <input type="email" name="email" id="email" class="form-control" value="<%= email %>" placeholder="<%= _.t('ph_email') %>" required />
+        </div>
+    </div>
+
+    <% if(_.c('mod_participate_userdata').indexOf('name') !== -1) { %>
+    <div class="form-group">
+        <label class="col-xs-12 col-sm-3 control-label hidden-xs"><%= _.t('first_and_lastname') %> <%= (required.name)?'*':'' %></label>
+
+        <div class="col-xs-12 col-sm-3">
+            <label for="gender" class="visible-xs"><%= _.t('gender') %></label>
+            <select name="gender" id="gender" class="form-control">
+                <option value="woman"
+                <%= (user_data.gender === 'women')?' selected':'' %>><%= _.t('woman') %></option>
+                <option value="men"
+                <%= (user_data.gender === 'men')?' selected':'' %>><%= _.t('man') %></option>
+            </select>
+        </div>
+
+        <div class="clearfix visible-xs"></div>
+
+        <div class="col-xs-6 col-sm-3">
+            <label for="firstname" class="visible-xs"><%= _.t('firstname') %> <%= (required.name)?'*':'' %></label>
+            <input type="text" name="firstname" id="firstname" class="form-control" value="<%= user_data.firstname %>" placeholder="<%= _.t('ph_firstname') %>" <%= (required.name)?'required':'' %> />
+        </div>
+
+        <div class="col-xs-6 col-sm-3">
+            <label for="lastname" class="visible-xs"><%= _.t('lastname') %> <%= (required.name)?'*':'' %></label>
+            <input type="text" name="lastname" id="lastname" class="form-control" value="<%= user_data.lastname %>" placeholder="<%= _.t('ph_lastname') %>" <%= (required.name)?'required':'' %> />
+        </div>
+    </div>
+    <% }
+
+    if(_.c('mod_participate_userdata').indexOf('birthday') !== -1) { %>
+    <div class="form-group">
+        <label for="birthday" class="col-xs-12 col-sm-3 control-label"><%= _.t('birthday') %> <%= (required.birthday)?'*':'' %></label>
+
+        <div class="col-xs-12 col-sm-9">
+            <input type="text" name="birthday" id="birthday" class="form-control" value="<%= user_data.birthday %>" placeholder="<%= _.t('ph_birthday') %>" <%= (required.name)?'required':'' %> />
+        </div>
+    </div>
+    <% }
+
+    if(_.c('mod_participate_userdata').indexOf('address') !== -1) { %>
+    <div class="form-group">
+        <label for="street" class="col-xs-12 col-sm-3 control-label"><%= _.t('street') %> <%= (required.address)?'*':'' %></label>
+
+        <div class="col-xs-12 col-sm-9">
+            <input type="text" name="street" id="street" class="form-control" value="<%= user_data.street %>" placeholder="<%= _.t('ph_street') %>" <%= (required.address)?'required':'' %> />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-3 hidden-xs control-label"><%= _.t('zip_city') %> <%= (required.address)?'*':'' %></label>
+        <label class="col-xs-6 visible-xs control-label" for="zip"><%= _.t('zip') %> <%= (required.address)?'*':'' %></label>
+        <label class="col-xs-6 visible-xs control-label" for="city"><%= _.t('city') %> <%= (required.address)?'*':'' %></label>
+
+        <div class="col-xs-6 col-sm-3">
+            <input type="text" name="zip" id="zip" class="form-control" value="<%= user_data.zip %>" placeholder="<%= _.t('ph_zip') %>" <%= (required.address)?'required':'' %> />
+        </div>
+
+        <div class="col-xs-6">
+            <input type="text" name="city" id="city" class="form-control" value="<%= user_data.city %>" placeholder="<%= _.t('ph_city') %>" <%= (required.address)?'required':'' %> />
+        </div>
+    </div>
+    <% }
+
+    if(_.c('mod_participate_userdata').indexOf('field1') !== -1) { %>
+    <div class="form-group">
+        <label for="field1" class="col-xs-12 col-sm-3 control-label"><%= _.c('user_data_indi_field1') %> <%= (required.field1)?'*':'' %></label>
+
+        <div class="col-xs-12 col-sm-9">
+            <input type="text" name="field1" id="field1" value="<%= user_data.field1 %>" class="form-control" placeholder="<%= _.t('ph_indi_field1') %>" <%= (required.field1)?'required':'' %> />
+        </div>
+    </div>
+    <% }
+
+    if(_.c('mod_participate_userdata').indexOf('field2') !== -1) { %>
+    <div class="form-group">
+        <label for="field2" class="col-xs-12 col-sm-3 control-label"><%= _.c('user_data_indi_field2') %> <%= (required.field2)?'*':'' %></label>
+
+        <div class="col-xs-12 col-sm-9">
+            <input type="text" name="field2" id="field2" value="<%= user_data.field2 %>" class="form-control" placeholder="<%= _.t('ph_indi_field2') %>" <%= (required.field2)?'required':'' %> />
+        </div>
+    </div>
+    <% }
+
+    if(_.c('mod_participate_userdata').indexOf('field3') !== -1) { %>
+    <div class="form-group">
+        <label for="field3" class="col-xs-12 col-sm-3 control-label"><%= _.c('user_data_indi_field3') %> <%= (required.field3)?'*':'' %></label>
+
+        <div class="col-xs-12 col-sm-9">
+            <input type="text" name="field3" id="field3" value="<%= user_data.field3 %>" class="form-control" placeholder="<%= _.t('ph_indi_field3') %>" <%= (required.field3)?'required':'' %> />
+        </div>
+    </div>
+    <% } %>
+
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-xs-12">
+            <div class="checkbox">
+                <label class="input-append">
+                <input type="checkbox" name="terms" id="terms" <%= (user_data.terms === 'true')?'checked':'' %> /> <% var terms_trans = _.t('agb'), terms_link = '<a href="#/page/terms">' + _.t('terms') + '</a>'; print(_.sprintf(terms_trans, terms_link)); %>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-xs-12">
+            <% if(_.c('mod_newsletter_activated') === '1') { %>
+            <div class="checkbox">
+                <label class="input-append">
+                <input type="checkbox" name="newsletter" id="newsletter" <%= (user_data.newsletter === 'true')?'checked':'' %> /> <%= _.t('nl_subscribe') %>
+                </label>
+            </div>
+            <% } %>
+        </div>
+    </div>
+</form>
+<div>
+    <p class="text-danger">
+        <small>* = <%= _.t('required_field') %></small>
+    </p>
+</div>
+
+<button type="button" class="btn btn-primary submit"><%= _.t('btn_next_userdata') %></button>
