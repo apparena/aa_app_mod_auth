@@ -30,7 +30,7 @@ define([
                 newsletter:     'false',
                 reminder:       'false',
                 action:         'data',
-                module:         'auth'
+                module:         'aa_app_mod_auth'
             },
 
             initialize: function () {
