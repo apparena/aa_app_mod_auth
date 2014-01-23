@@ -10,7 +10,9 @@ define([
         Model.namespace = 'authUserData';
 
         Model.code = Backbone.Model.extend({
-            localStorage: new Backbone.LocalStorage('AppArenaAdventskalenderApp_' + _.aa.instance.i_id + '_UserData'),
+            localStorage: new Backbone.LocalStorage('aa_app_mod_auth_' + _.aa.instance.i_id + '_UserData'),
+
+            updateFromDatabase: true,
 
             defaults: {
                 email:          '',
@@ -34,7 +36,13 @@ define([
             },
 
             initialize: function () {
+                _.bindAll('this', 'disableUpdateFromDatabase');
+                this.on('change', 'disableUpdateFromDatabase', this);
                 this.fetch();
+            },
+
+            disableUpdateFromDatabase: function () {
+                this.updateFromDatabase = false;
             }
         });
 
