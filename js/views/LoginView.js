@@ -208,9 +208,7 @@ define([
                         that.facebookLoginModel = LoginModel().init();
                         that.facebookLoginModel.on('change', that.fbLoginDone, that);
                     });
-                }
-
-                if (_.c('login_social_networks').indexOf('twitter') !== -1) {
+                } else if (_.c('login_social_networks').indexOf('twitter') !== -1) {
                     require([
                         'modules/aa_app_mod_twitter/js/views/TwitterView',
                         'modules/aa_app_mod_twitter/js/models/LoginModel'
@@ -220,9 +218,7 @@ define([
                         that.twitterLoginModel = LoginModel().init();
                         that.twitterLoginModel.on('change', that.twLoginDone, that);
                     });
-                }
-
-                if (_.c('login_social_networks').indexOf('gplus') !== -1) {
+                } else if (_.c('login_social_networks').indexOf('gplus') !== -1) {
                     require([
                         'modules/aa_app_mod_google/js/views/GoogleView',
                         'modules/aa_app_mod_google/js/models/LoginModel'
@@ -408,7 +404,7 @@ define([
                     if (this.pagetype === 'modal') {
                         // close login modal
                         this.modal_obj.modal('hide');
-                        if(!_.isEmpty(this.redirection)) {
+                        if (!_.isEmpty(this.redirection)) {
                             this.goTo(this.redirection);
                         }
                     } else {

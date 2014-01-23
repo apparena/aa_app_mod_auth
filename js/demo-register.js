@@ -21,14 +21,15 @@ define([
                             model: loginView.loginModel
                         }
                     });
-                userDataView.modifyElement(element).showUserInformation();
-                if (userDataView.status === 'needUserdata') {
-                    // show userdata page
-                    userDataView.renderPage();
-                } else {
-                    // all userdata exist, redirect to startpage
-                    _.navigate('');
-                }
+                userDataView.modifyElement(element).defineUserInformation(function () {
+                    if (userDataView.status === 'needUserdata') {
+                        // show userdata page
+                        userDataView.renderPage();
+                    } else {
+                        // all userdata exist, redirect to startpage
+                        _.router.navigate('', {trigger: true});
+                    }
+                });
             });
         }
     };

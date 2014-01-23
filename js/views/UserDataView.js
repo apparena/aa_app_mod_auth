@@ -26,9 +26,22 @@ define([
             },
 
             initialize: function () {
-                _.bindAll(this, 'renderPage', 'renderModal', 'userInformation', 'addRedirection', 'modifyElement', 'submit', 'allUserDataStored', 'checkKeypress');
+                _.bindAll(this, 'renderPage', 'renderModal', 'checkUserdata', 'defineRequirements', 'defineTemplateInformation', 'defineUserInformation', 'addRedirection', 'modifyElement', 'submit', 'allUserDataStored', 'checkKeypress', 'mergeUserdata');
 
                 this.user_data_model = UserDataModel().init();
+            },
+
+            mergeUserdata: function (attributes) {
+                var that = this;
+                _.each(attributes, function (value, key) {
+                    //_.debug.log(key, value, that.user_data_model.has(key), that.user_data_model.has(value));
+                    if (!that.user_data_model.has(key) || _.isEmpty(that.user_data_model.get(key))) {
+                        _.debug.warn('add', key, value);
+                        that.user_data_model.set(key, value);
+                    } else {
+                        _.debug.info(key + ' exist', value, that.user_data_model.get(key));
+                    }
+                });
             },
 
             renderPage: function () {
@@ -64,13 +77,87 @@ define([
                 return this;
             },
 
-            userInformation: function () {
+            defineUserInformation: function (callback) {
                 var that = this;
 
-                // todo check if login process is done
+                this.callback = callback || function () {
+                };
 
-                // if userdata allready exist, cancel call
-                if (this.allUserDataStored() && this.user_data_model.get('login_type') === 'appuser') {
+                // check login status
+                if (this.model.get('uid') === '0') {
+                    this.goTo('');
+                }
+
+                _.debug.log('BAHM', this.user_data_model.updateFromDatabase);
+
+                if (this.user_data_model.updateFromDatabase === true) {
+                    // get userdata from database
+                    this.ajax({
+                        data:   {
+                            'auth_uid': this.model.get('uid')
+                        },
+                        module: this.model.get('module'),
+                        action: 'getDataById'
+                    }, true, function (resp) {
+                        if (resp.data.additional !== null) {
+                            // if user data exist in database, put them into data model
+                            that.user_data_model.set($.parseJSON(resp.data.additional));
+                        }
+                        
+                        // store social model login data to login model if not exist
+                        if (that.model.get('login_type') === 'fbuser') {
+                            // FACEBOOK USER
+                            _.debug.log('fbuser');
+                            require(['modules/aa_app_mod_facebook/js/models/LoginModel'], function (FacebookLoginModel) {
+                                that.mergeUserdata(FacebookLoginModel().init().attributes);
+                                // unset some not needed data
+                                that.user_data_model.unset('fbid')
+                                    .unset('login_type')
+                                    .unset('verified');
+                                that.user_data_model.save();
+                                that.checkUserdata();
+                            });
+                        } else if (that.model.get('login_type') === 'twuser') {
+                            // TWITTER USER
+                            _.debug.log('twuser');
+                            require(['modules/aa_app_mod_twitter/js/models/LoginModel'], function (TwitterLoginModel) {
+                                that.mergeUserdata(TwitterLoginModel().init().attributes);
+                                // unset some not needed data
+                                that.user_data_model.unset('login_type');
+                                that.user_data_model.save();
+                                that.checkUserdata();
+                            });
+                        } else if (that.model.get('login_type') === 'gpuser') {
+                            // GOOGLE+ USER
+                            _.debug.log('gpuser');
+                            require(['modules/aa_app_mod_google/js/models/LoginModel'], function (GoogleLoginModel) {
+                                that.mergeUserdata(GoogleLoginModel().init().attributes);
+                                // unset some not needed data
+                                that.user_data_model.unset('login_type');
+                                that.user_data_model.save();
+                                that.checkUserdata();
+                            });
+                        } else {
+                            // save data to local storage for normal users
+                            _.debug.log('normal user');
+                            that.user_data_model.save();
+                            that.checkUserdata();
+                        }
+
+                    });
+                } else {
+                    _.debug.log('NO updateFromDatabase');
+                    this.checkUserdata();
+                }
+
+                return this;
+            },
+
+            checkUserdata: function () {
+                // If userdata allready exist, cancel call, but only for app user. Social user can be validate the data after first login.
+
+                if (this.allUserDataStored() && this.model.get('login_type') === 'appuser') {
+                    // TODO FIXIT: ERROR ON LOG
                     this.log('action', 'user_participate_data_already_exists', {
                         auth_uid:      _.uid,
                         auth_uid_temp: _.uid_temp,
@@ -78,14 +165,20 @@ define([
                         data_obj:      {}
                     });
                     this.status = 'userdataAlreadyExist';
+                    this.callback();
                     return false;
                 }
 
-                this.goTo('call/auth-userdata');
+                _.debug.info(this.allUserDataStored(), this.model.get('login_type'));
 
+                this.goTo('call/auth-userdata');
+                this.defineRequirements();
+                return this;
+            },
+
+            defineRequirements: function () {
                 // define form requirements
-                var required_selection = _.c('mod_participate_userdata_requirements'),
-                    compiledTemplate, data, email;
+                var required_selection = _.c('mod_participate_userdata_requirements');
 
                 this.required = {
                     name:     false,
@@ -114,8 +207,12 @@ define([
                 if (required_selection.indexOf('field3') !== -1) {
                     this.required.field3 = true;
                 }
+                this.defineTemplateInformation();
+                return this;
+            },
 
-                email = this.model.get('email');
+            defineTemplateInformation: function () {
+                var email = this.model.get('email');
 
                 if (this.model.get('login_type') === 'twuser' || this.model.get('login_type') === 'gpuser') {
                     email = '';
@@ -130,6 +227,7 @@ define([
                 // set status
                 this.status = 'needUserdata';
 
+                this.callback();
                 return this;
             },
 
@@ -278,9 +376,8 @@ define([
                 var that = this,
                     userdata = _.c('mod_participate_userdata').split(','),
                     requirements = _.c('mod_participate_userdata_requirements').split(','),
-                    required = _.intersection(userdata, requirements);
-
-                this.return_value = true;
+                    required = _.intersection(userdata, requirements),
+                    return_value = true;
 
                 // add terms and email as required - thats allways required and can't turned off
                 required.push('terms');
@@ -307,11 +404,13 @@ define([
                 }
 
                 _.each(required, function (value) {
-                    if (_.isEmpty(that.user_data_model.get(value)) || that.user_data_model.get(value) === 'false') {
-                        that.return_value = false;
+                    var modelValue = that.user_data_model.get(value);
+                    if ((_.isEmpty(modelValue) && !_.isNumber(modelValue)) || modelValue === 'false' || modelValue === 0) {
+                        _.debug.warn(value + ' is empty', typeof modelValue, modelValue, _.isEmpty(modelValue));
+                        return_value = false;
                     }
                 });
-                return this.return_value;
+                return return_value;
             }
         });
 

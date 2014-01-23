@@ -30,19 +30,20 @@ define([
                         attributes: {
                             model: loginView.loginModel
                         }
-                    }).showUserInformation();
-                if (userDataView.status === 'needUserdata') {
-                    // show userdata modal
-                    userDataView.renderModal();
-                    element = userDataView.$el;
-                    element.on('hidden.bs.modal', function () {
-                        element.off('hidden.bs.modal');
-                        UserDataView().remove();
+                    }).defineUserInformation(function () {
+                        if (userDataView.status === 'needUserdata') {
+                            // show userdata modal
+                            userDataView.renderModal();
+                            element = userDataView.$el;
+                            element.on('hidden.bs.modal', function () {
+                                element.off('hidden.bs.modal');
+                                UserDataView().remove();
+                            });
+                        } else {
+                            // all userdata exist, redirect to startpage
+                            _.router.navigate('', {trigger: true});
+                        }
                     });
-                } else {
-                    // all userdata exist, redirect to startpage
-                    _.navigate('');
-                }
             });
         }
     };

@@ -36,8 +36,7 @@ define([
             },
 
             initialize: function () {
-                _.bindAll('this', 'disableUpdateFromDatabase');
-                this.on('change', 'disableUpdateFromDatabase', this);
+                this.on('change', this.disableUpdateFromDatabase, this);
                 this.fetch();
             },
 
