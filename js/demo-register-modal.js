@@ -30,7 +30,7 @@ define([
                         attributes: {
                             model: loginView.loginModel
                         }
-                    }).userInformation();
+                    }).showUserInformation();
                 if (userDataView.status === 'needUserdata') {
                     // show userdata modal
                     userDataView.renderModal();

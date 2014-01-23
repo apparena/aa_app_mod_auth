@@ -21,7 +21,7 @@ define([
                             model: loginView.loginModel
                         }
                     });
-                userDataView.modifyElement(element).userInformation();
+                userDataView.modifyElement(element).showUserInformation();
                 if (userDataView.status === 'needUserdata') {
                     // show userdata page
                     userDataView.renderPage();
