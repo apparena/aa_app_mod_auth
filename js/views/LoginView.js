@@ -371,8 +371,7 @@ define([
             },
 
             successOnCheck: function (data) {
-                var that = this,
-                    user_type = 'exist';
+                var user_type = 'exist';
                 this.setDoorModalObject();
 
                 // refresh global user id
@@ -437,26 +436,8 @@ define([
                     });
                 } else {
                     // critical other error
-                    /*this.log('action', 'user_participate_login_error', {
-                        auth_uid:      _.uid,
-                        auth_uid_temp: _.uid_temp,
-                        code:          1005,
-                        data_obj:      {
-                            code:    0,
-                            message: 'some went wrong, but I don\'t know what exactly - ' + data.message
-                        }
-                    });*/
-
                     _.debug.error('code 200', 'critical error on login');
                     _.debug.log(data);
-                    /*this.log('action', 'user_participated_error', {
-                        auth_uid:      _.uid,
-                        auth_uid_temp: _.uid_temp,
-                        code:          1011,
-                        data_obj:      {
-                            error_code: '200'
-                        }
-                    });*/
 
                     this.log('group', {
                         'user_participate_login_error': {
