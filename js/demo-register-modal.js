@@ -1,4 +1,6 @@
-define(['underscore'], function (_) {
+define([
+    'underscore'
+], function (_) {
     'use strict';
 
     return function (type) {
