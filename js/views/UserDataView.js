@@ -156,7 +156,7 @@ define([
             checkUserdata: function () {
                 // If userdata allready exist, cancel call, but only for app user. Social user can be validate the data after first login.
                 if (this.allUserDataStored() && this.model.get('login_type') === 'appuser') {
-                    this.log('action', 'user_participate_data_already_exists', {
+                    this.log('action', 'user_auth_data_already_exists', {
                         auth_uid:      _.uid,
                         auth_uid_temp: _.uid_temp,
                         code:          1009,
@@ -295,7 +295,7 @@ define([
                 });
 
                 if (!form.valid()) {
-                    this.log('action', 'user_participate_data_validation', {
+                    this.log('action', 'user_auth_data_validation_error', {
                         auth_uid:      _.uid,
                         auth_uid_temp: _.uid_temp,
                         code:          1006,
@@ -321,7 +321,7 @@ define([
                 };
                 this.ajax(data, true);
 
-                this.log('action', 'user_participate_data_submit', {
+                this.log('action', 'user_auth_data_submit', {
                     auth_uid:      _.uid,
                     auth_uid_temp: _.uid_temp,
                     code:          1007,

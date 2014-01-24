@@ -311,7 +311,7 @@ define([
 
                 // return if is_valid is false
                 if (!form.valid()) {
-                    this.log('action', 'user_participate_login_validation', {
+                    this.log('action', 'user_auth_login_validation', {
                         auth_uid:      _.uid,
                         auth_uid_temp: _.uid_temp,
                         code:          1001,
@@ -354,7 +354,7 @@ define([
                         that.successOnCheck(return_data.data);
                     } else {
                         _.debug.error('error, code 100', 'login error in loginProcess');
-                        that.log('action', 'user_participated_error', {
+                        that.log('action', 'user_auth_error', {
                             auth_uid:      _.uid,
                             auth_uid_temp: _.uid_temp,
                             code:          1011,
@@ -391,7 +391,7 @@ define([
                     });
                     this.loginModel.save();
 
-                    this.log('action', 'user_participate_login_successfully', {
+                    this.log('action', 'user_auth_successfully', {
                         auth_uid:      _.uid,
                         auth_uid_temp: _.uid_temp,
                         code:          1002,
@@ -413,7 +413,7 @@ define([
                     this.enableKeypress = false;
                 } else if (data.code === '203') {
                     // wrong password
-                    this.log('action', 'user_participate_login_wrong', {
+                    this.log('action', 'user_auth_wrong', {
                         auth_uid:      _.uid,
                         auth_uid_temp: _.uid_temp,
                         code:          1004,
@@ -436,7 +436,7 @@ define([
                     _.debug.log(data);
 
                     this.log('group', {
-                        'user_participate_login_error': {
+                        /*'user_auth_error': {
                             auth_uid:      _.uid,
                             auth_uid_temp: _.uid_temp,
                             code:          1005,
@@ -444,14 +444,15 @@ define([
                                 code:    0,
                                 message: 'some went wrong, but I don\'t know what exactly - ' + data.message
                             }
-                        },
+                        },*/
 
-                        'user_participated_error': {
+                        'user_auth_error': {
                             auth_uid:      _.uid,
                             auth_uid_temp: _.uid_temp,
                             code:          1011,
                             data_obj:      {
-                                error_code: '200'
+                                error_code: '200',
+                                message: 'some went wrong, but I don\'t know what exactly - ' + data.message
                             }
                         }
                     });
