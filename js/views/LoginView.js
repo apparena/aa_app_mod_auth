@@ -33,7 +33,7 @@ define([
                 this.loginModel = LoginModel().init({
                     id: 1
                 });
-                this.loginModel.on('change:uid', this.handleNavigation, this);
+                this.listenTo(this.loginModel, 'change:logintime', this.handleNavigation);
 
                 this.data = {
                     'modal_id':   'sign-up-modal',
@@ -387,7 +387,8 @@ define([
                         avatar:    data.avatar,
                         gid:       0,
                         user_type: user_type,
-                        tmp:       this.tmpUserData
+                        tmp:       this.tmpUserData,
+                        logintime: _.uniqueId()
                     });
                     this.loginModel.save();
 
@@ -437,14 +438,14 @@ define([
 
                     this.log('group', {
                         /*'user_auth_error': {
-                            auth_uid:      _.uid,
-                            auth_uid_temp: _.uid_temp,
-                            code:          1005,
-                            data_obj:      {
-                                code:    0,
-                                message: 'some went wrong, but I don\'t know what exactly - ' + data.message
-                            }
-                        },*/
+                         auth_uid:      _.uid,
+                         auth_uid_temp: _.uid_temp,
+                         code:          1005,
+                         data_obj:      {
+                         code:    0,
+                         message: 'some went wrong, but I don\'t know what exactly - ' + data.message
+                         }
+                         },*/
 
                         'user_auth_error': {
                             auth_uid:      _.uid,
@@ -452,7 +453,7 @@ define([
                             code:          1011,
                             data_obj:      {
                                 error_code: '200',
-                                message: 'some went wrong, but I don\'t know what exactly - ' + data.message
+                                message:    'some went wrong, but I don\'t know what exactly - ' + data.message
                             }
                         }
                     });

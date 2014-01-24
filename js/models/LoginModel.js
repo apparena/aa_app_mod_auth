@@ -22,7 +22,8 @@ define([
                 action:     'login',
                 module:     'aa_app_mod_auth',
                 avatar:     'https://secure.gravatar.com/avatar/00000000000000000000000000000000?s=40&d=mm',
-                email:      ''
+                email:      '',
+                logintime:  ''
             }
         });
 

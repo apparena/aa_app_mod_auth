@@ -113,6 +113,7 @@ define([
                                 // unset some not needed data
                                 that.user_data_model.unset('fbid')
                                     .unset('login_type')
+                                    .unset('logintime')
                                     .unset('verified');
                                 that.user_data_model.save();
                                 that.checkUserdata();
@@ -123,7 +124,8 @@ define([
                             require(['modules/aa_app_mod_twitter/js/models/LoginModel'], function (TwitterLoginModel) {
                                 that.mergeUserdata(TwitterLoginModel().init().attributes);
                                 // unset some not needed data
-                                that.user_data_model.unset('login_type');
+                                that.user_data_model.unset('login_type')
+                                    .unset('logintime');
                                 that.user_data_model.save();
                                 that.checkUserdata();
                             });
@@ -133,7 +135,8 @@ define([
                             require(['modules/aa_app_mod_google/js/models/LoginModel'], function (GoogleLoginModel) {
                                 that.mergeUserdata(GoogleLoginModel().init().attributes);
                                 // unset some not needed data
-                                that.user_data_model.unset('login_type');
+                                that.user_data_model.unset('login_type')
+                                    .unset('logintime');
                                 that.user_data_model.save();
                                 that.checkUserdata();
                             });
