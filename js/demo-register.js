@@ -1,4 +1,6 @@
-define(function () {
+define([
+    'underscore'
+], function (_) {
     'use strict';
 
     return function (type) {
@@ -19,14 +21,15 @@ define(function () {
                             model: loginView.loginModel
                         }
                     });
-                userDataView.modifyElement(element).userInformation();
-                if (userDataView.status === 'needUserdata') {
-                    // show userdata page
-                    userDataView.renderPage();
-                } else {
-                    // all userdata exist, redirect to startpage
-                    _.navigate('');
-                }
+                userDataView.modifyElement(element).defineUserInformation(function () {
+                    if (userDataView.status === 'needUserdata') {
+                        // show userdata page
+                        userDataView.renderPage();
+                    } else {
+                        // all userdata exist, redirect to startpage
+                        _.router.navigate('', {trigger: true});
+                    }
+                });
             });
         }
     };

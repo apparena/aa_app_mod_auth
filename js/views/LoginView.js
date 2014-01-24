@@ -33,7 +33,7 @@ define([
                 this.loginModel = LoginModel().init({
                     id: 1
                 });
-                this.loginModel.on('change:uid', this.handleNavigation, this);
+                this.listenTo(this.loginModel, 'change:logintime', this.handleNavigation);
 
                 this.data = {
                     'modal_id':   'sign-up-modal',
@@ -206,10 +206,9 @@ define([
                         that.facebook = Facebook().init();
                         that.facebook.addClickEventListener();
                         that.facebookLoginModel = LoginModel().init();
-                        that.facebookLoginModel.on('change', that.fbLoginDone, that);
+                        that.listenTo(that.facebookLoginModel, 'change:logintime', that.fbLoginDone);
                     });
                 }
-
                 if (_.c('login_social_networks').indexOf('twitter') !== -1) {
                     require([
                         'modules/aa_app_mod_twitter/js/views/TwitterView',
@@ -218,10 +217,9 @@ define([
                         that.twitter = Twitter().init();
                         that.twitter.addClickEventListener();
                         that.twitterLoginModel = LoginModel().init();
-                        that.twitterLoginModel.on('change', that.twLoginDone, that);
+                        that.listenTo(that.twitterLoginModel, 'change:logintime', that.twLoginDone);
                     });
                 }
-
                 if (_.c('login_social_networks').indexOf('gplus') !== -1) {
                     require([
                         'modules/aa_app_mod_google/js/views/GoogleView',
@@ -230,7 +228,7 @@ define([
                         that.google = Google().init();
                         that.google.addClickEventListener();
                         that.googleLoginModel = LoginModel().init();
-                        that.googleLoginModel.on('change', that.gpLoginDone, that);
+                        that.listenTo(that.googleLoginModel, 'change:logintime', that.gpLoginDone);
                     });
                 }
             },
@@ -269,8 +267,8 @@ define([
                 this.loginModel.set({
                     login_type: this.googleLoginModel.get('login_type'),
                     sid:        this.googleLoginModel.get('gpid'),
-                    //email:      this.googleLoginModel.get('email'),
-                    email:      '',
+                    email:      this.googleLoginModel.get('email'),
+                    //email:      '',
                     password:   '',
                     avatar:     this.googleLoginModel.get('avatar')
                 });
@@ -315,7 +313,7 @@ define([
 
                 // return if is_valid is false
                 if (!form.valid()) {
-                    this.log('action', 'user_participate_login_validation', {
+                    this.log('action', 'user_auth_login_validation', {
                         auth_uid:      _.uid,
                         auth_uid_temp: _.uid_temp,
                         code:          1001,
@@ -358,7 +356,7 @@ define([
                         that.successOnCheck(return_data.data);
                     } else {
                         _.debug.error('error, code 100', 'login error in loginProcess');
-                        that.log('action', 'user_participated_error', {
+                        that.log('action', 'user_auth_error', {
                             auth_uid:      _.uid,
                             auth_uid_temp: _.uid_temp,
                             code:          1011,
@@ -371,8 +369,7 @@ define([
             },
 
             successOnCheck: function (data) {
-                var that = this,
-                    user_type = 'exist';
+                var user_type = 'exist';
                 this.setDoorModalObject();
 
                 // refresh global user id
@@ -392,11 +389,12 @@ define([
                         avatar:    data.avatar,
                         gid:       0,
                         user_type: user_type,
-                        tmp:       this.tmpUserData
+                        tmp:       this.tmpUserData,
+                        logintime: _.uniqueId()
                     });
                     this.loginModel.save();
 
-                    this.log('action', 'user_participate_login_successfully', {
+                    this.log('action', 'user_auth_successfully', {
                         auth_uid:      _.uid,
                         auth_uid_temp: _.uid_temp,
                         code:          1002,
@@ -409,7 +407,7 @@ define([
                     if (this.pagetype === 'modal') {
                         // close login modal
                         this.modal_obj.modal('hide');
-                        if(!_.isEmpty(this.redirection)) {
+                        if (!_.isEmpty(this.redirection)) {
                             this.goTo(this.redirection);
                         }
                     } else {
@@ -418,7 +416,7 @@ define([
                     this.enableKeypress = false;
                 } else if (data.code === '203') {
                     // wrong password
-                    this.log('action', 'user_participate_login_wrong', {
+                    this.log('action', 'user_auth_wrong', {
                         auth_uid:      _.uid,
                         auth_uid_temp: _.uid_temp,
                         code:          1004,
@@ -437,44 +435,27 @@ define([
                     });
                 } else {
                     // critical other error
-                    /*this.log('action', 'user_participate_login_error', {
-                        auth_uid:      _.uid,
-                        auth_uid_temp: _.uid_temp,
-                        code:          1005,
-                        data_obj:      {
-                            code:    0,
-                            message: 'some went wrong, but I don\'t know what exactly - ' + data.message
-                        }
-                    });*/
-
                     _.debug.error('code 200', 'critical error on login');
                     _.debug.log(data);
-                    /*this.log('action', 'user_participated_error', {
-                        auth_uid:      _.uid,
-                        auth_uid_temp: _.uid_temp,
-                        code:          1011,
-                        data_obj:      {
-                            error_code: '200'
-                        }
-                    });*/
 
                     this.log('group', {
-                        'user_participate_login_error': {
-                            auth_uid:      _.uid,
-                            auth_uid_temp: _.uid_temp,
-                            code:          1005,
-                            data_obj:      {
-                                code:    0,
-                                message: 'some went wrong, but I don\'t know what exactly - ' + data.message
-                            }
-                        },
+                        /*'user_auth_error': {
+                         auth_uid:      _.uid,
+                         auth_uid_temp: _.uid_temp,
+                         code:          1005,
+                         data_obj:      {
+                         code:    0,
+                         message: 'some went wrong, but I don\'t know what exactly - ' + data.message
+                         }
+                         },*/
 
-                        'user_participated_error': {
+                        'user_auth_error': {
                             auth_uid:      _.uid,
                             auth_uid_temp: _.uid_temp,
                             code:          1011,
                             data_obj:      {
-                                error_code: '200'
+                                error_code: '200',
+                                message:    'some went wrong, but I don\'t know what exactly - ' + data.message
                             }
                         }
                     });
