@@ -206,7 +206,7 @@ define([
                         that.facebook = Facebook().init();
                         that.facebook.addClickEventListener();
                         that.facebookLoginModel = LoginModel().init();
-                        that.facebookLoginModel.on('change', that.fbLoginDone, that);
+                        that.listenTo(that.facebookLoginModel, 'change:logintime', that.fbLoginDone);
                     });
                 } else if (_.c('login_social_networks').indexOf('twitter') !== -1) {
                     require([
@@ -216,7 +216,7 @@ define([
                         that.twitter = Twitter().init();
                         that.twitter.addClickEventListener();
                         that.twitterLoginModel = LoginModel().init();
-                        that.twitterLoginModel.on('change', that.twLoginDone, that);
+                        that.listenTo(that.twitterLoginModel, 'change:logintime', that.twLoginDone);
                     });
                 } else if (_.c('login_social_networks').indexOf('gplus') !== -1) {
                     require([
@@ -226,7 +226,7 @@ define([
                         that.google = Google().init();
                         that.google.addClickEventListener();
                         that.googleLoginModel = LoginModel().init();
-                        that.googleLoginModel.on('change', that.gpLoginDone, that);
+                        that.listenTo(that.googleLoginModel, 'change:logintime', that.gpLoginDone);
                     });
                 }
             },
