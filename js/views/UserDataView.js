@@ -32,15 +32,20 @@ define([
             },
 
             mergeUserdata: function (attributes) {
-                var that = this;
+                var that = this,
+                    login_type = that.model.get('login_type');
                 _.each(attributes, function (value, key) {
                     //_.debug.log(key, value, that.user_data_model.has(key), that.user_data_model.has(value));
                     if (!that.user_data_model.has(key) || _.isEmpty(that.user_data_model.get(key))) {
-                        _.debug.warn('add', key, value);
+                        if (key === 'email' && (login_type === 'twuser' || login_type === 'gpuser')) {
+                            return false;
+                        }
+                        //_.debug.warn('add', key, value);
                         that.user_data_model.set(key, value);
-                    } else {
-                        _.debug.info(key + ' exist', value, that.user_data_model.get(key));
-                    }
+                    }/* else {
+                        _.debug.info(key + ' exist:', that.user_data_model.get(key), value);
+                    }*/
+                    return true;
                 });
             },
 
@@ -88,7 +93,7 @@ define([
                     this.goTo('');
                 }
 
-                _.debug.log('BAHM', this.user_data_model.updateFromDatabase);
+                //_.debug.log('BAHM', this.user_data_model.updateFromDatabase);
 
                 if (this.user_data_model.updateFromDatabase === true) {
                     // get userdata from database
@@ -103,11 +108,10 @@ define([
                             // if user data exist in database, put them into data model
                             that.user_data_model.set($.parseJSON(resp.data.additional));
                         }
-                        
+
                         // store social model login data to login model if not exist
                         if (that.model.get('login_type') === 'fbuser') {
                             // FACEBOOK USER
-                            _.debug.log('fbuser');
                             require(['modules/aa_app_mod_facebook/js/models/LoginModel'], function (FacebookLoginModel) {
                                 that.mergeUserdata(FacebookLoginModel().init().attributes);
                                 // unset some not needed data
@@ -120,7 +124,6 @@ define([
                             });
                         } else if (that.model.get('login_type') === 'twuser') {
                             // TWITTER USER
-                            _.debug.log('twuser');
                             require(['modules/aa_app_mod_twitter/js/models/LoginModel'], function (TwitterLoginModel) {
                                 that.mergeUserdata(TwitterLoginModel().init().attributes);
                                 // unset some not needed data
@@ -131,7 +134,6 @@ define([
                             });
                         } else if (that.model.get('login_type') === 'gpuser') {
                             // GOOGLE+ USER
-                            _.debug.log('gpuser');
                             require(['modules/aa_app_mod_google/js/models/LoginModel'], function (GoogleLoginModel) {
                                 that.mergeUserdata(GoogleLoginModel().init().attributes);
                                 // unset some not needed data
@@ -142,14 +144,13 @@ define([
                             });
                         } else {
                             // save data to local storage for normal users
-                            _.debug.log('normal user');
                             that.user_data_model.save();
                             that.checkUserdata();
                         }
 
                     });
                 } else {
-                    _.debug.log('NO updateFromDatabase');
+                    //_.debug.log('NO updateFromDatabase');
                     this.checkUserdata();
                 }
 
@@ -157,8 +158,8 @@ define([
             },
 
             checkUserdata: function () {
-                // If userdata allready exist, cancel call, but only for app user. Social user can be validate the data after first login.
-                if (this.allUserDataStored() && this.model.get('login_type') === 'appuser') {
+                // If userdata allready exist, cancel call /*, but only for app user. Social user can be validate the data after first login.*/
+                if (this.allUserDataStored()/* && this.model.get('login_type') === 'appuser'*/) {
                     this.log('action', 'user_auth_data_already_exists', {
                         auth_uid:      _.uid,
                         auth_uid_temp: _.uid_temp,
@@ -172,7 +173,7 @@ define([
                     return false;
                 }
 
-                _.debug.info(this.allUserDataStored(), this.model.get('login_type'));
+                //_.debug.info(this.allUserDataStored(), this.model.get('login_type'));
 
                 this.goTo('call/auth-userdata');
                 this.defineRequirements();
@@ -215,11 +216,11 @@ define([
             },
 
             defineTemplateInformation: function () {
-                var email = this.model.get('email');
+                var email = this.user_data_model.get('email');
 
-                if (this.model.get('login_type') === 'twuser' || this.model.get('login_type') === 'gpuser') {
-                    email = '';
-                }
+                /*if (this.model.get('login_type') === 'twuser' || this.model.get('login_type') === 'gpuser') {
+                 email = '';
+                 }*/
 
                 this.userTemplatedata = {
                     'required':  this.required,
@@ -409,7 +410,7 @@ define([
                 _.each(required, function (value) {
                     var modelValue = that.user_data_model.get(value);
                     if ((_.isEmpty(modelValue) && !_.isNumber(modelValue)) || modelValue === 'false' || modelValue === 0) {
-                        _.debug.warn(value + ' is empty', typeof modelValue, modelValue, _.isEmpty(modelValue));
+                        //_.debug.warn(value + ' is empty', typeof modelValue, modelValue, _.isEmpty(modelValue));
                         return_value = false;
                     }
                 });

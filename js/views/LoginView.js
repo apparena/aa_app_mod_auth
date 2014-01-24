@@ -208,7 +208,8 @@ define([
                         that.facebookLoginModel = LoginModel().init();
                         that.listenTo(that.facebookLoginModel, 'change:logintime', that.fbLoginDone);
                     });
-                } else if (_.c('login_social_networks').indexOf('twitter') !== -1) {
+                }
+                if (_.c('login_social_networks').indexOf('twitter') !== -1) {
                     require([
                         'modules/aa_app_mod_twitter/js/views/TwitterView',
                         'modules/aa_app_mod_twitter/js/models/LoginModel'
@@ -218,7 +219,8 @@ define([
                         that.twitterLoginModel = LoginModel().init();
                         that.listenTo(that.twitterLoginModel, 'change:logintime', that.twLoginDone);
                     });
-                } else if (_.c('login_social_networks').indexOf('gplus') !== -1) {
+                }
+                if (_.c('login_social_networks').indexOf('gplus') !== -1) {
                     require([
                         'modules/aa_app_mod_google/js/views/GoogleView',
                         'modules/aa_app_mod_google/js/models/LoginModel'
@@ -265,8 +267,8 @@ define([
                 this.loginModel.set({
                     login_type: this.googleLoginModel.get('login_type'),
                     sid:        this.googleLoginModel.get('gpid'),
-                    //email:      this.googleLoginModel.get('email'),
-                    email:      '',
+                    email:      this.googleLoginModel.get('email'),
+                    //email:      '',
                     password:   '',
                     avatar:     this.googleLoginModel.get('avatar')
                 });
