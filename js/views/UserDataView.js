@@ -155,14 +155,14 @@ define([
 
             checkUserdata: function () {
                 // If userdata allready exist, cancel call, but only for app user. Social user can be validate the data after first login.
-
                 if (this.allUserDataStored() && this.model.get('login_type') === 'appuser') {
-                    // TODO FIXIT: ERROR ON LOG
                     this.log('action', 'user_participate_data_already_exists', {
                         auth_uid:      _.uid,
                         auth_uid_temp: _.uid_temp,
                         code:          1009,
-                        data_obj:      {}
+                        data_obj:      {
+                            message: ''
+                        }
                     });
                     this.status = 'userdataAlreadyExist';
                     this.callback();
