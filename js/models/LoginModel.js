@@ -10,7 +10,7 @@ define([
         Model.namespace = 'authLogin';
 
         Model.code = Backbone.Model.extend({
-            localStorage: new Backbone.LocalStorage('aa_app_mod_auth_' + _.aa.instance.i_id + '_UserLogin'),
+            localStorage: new Backbone.LocalStorage('AppArenaTippspielApp_' + _.aa.instance.i_id + '_UserLogin'),
 
             defaults: {
                 uid:        '0',
@@ -21,7 +21,7 @@ define([
                 session:    '',
                 action:     'login',
                 module:     'aa_app_mod_auth',
-                avatar:     'https://secure.gravatar.com/avatar/00000000000000000000000000000000?s=40&d=mm',
+                avatar:     'https://secure.gravatar.com/avatar/00000000000000000000000000000000?s=128&d=mm',
                 email:      '',
                 logintime:  ''
             }

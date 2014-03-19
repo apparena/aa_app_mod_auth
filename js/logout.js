@@ -29,13 +29,11 @@ define([
             View.namespace = 'key';
             View.remove();
         });
-
+        _.uid = undefined;
         // handle navigation bar
-        $('.navbar-nav').find('#nav-login').removeClass('hide').end().find('.nav-logout').addClass('hide').end().find('#nav-admin').addClass('hide');
-        $('.nav-profile').addClass('hide');
-        $('.modal').remove();
-        $('.modal-backdrop').remove();
-
+        $('.navbar-nav').find('#nav-login').removeClass('hide').addClass('hidden-xs').end().find('.nav-logout').addClass('hide').end().find('#nav-admin').addClass('hide');
+        $('#nav-profile').addClass('hide').removeClass('hidden-xs');
+        $('.navbar-nav').find('#notification').addClass('hide');
         // redirect to home
         _.router.navigate('', {trigger: true});
     };

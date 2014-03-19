@@ -10,7 +10,7 @@ define([
         Model.namespace = 'authPasswordLost';
 
         Model.code = Backbone.Model.extend({
-            localStorage: new Backbone.LocalStorage('aa_app_mod_auth_' + _.aa.instance.i_id + '_PasswordLost'),
+            localStorage: new Backbone.LocalStorage('AppArenaTippspielApp_' + _.aa.instance.i_id + '_PasswordLost'),
 
             defaults: {
                 email: ''

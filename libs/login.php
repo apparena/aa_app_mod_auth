@@ -217,11 +217,10 @@ try
             $gp_id = $user[ROW_GP_ID];
         }*/
     }
-    $return['avatar'] = 'https://secure.gravatar.com/avatar/' . md5(strtolower($email)) . '?s=40&d=mm';
+    $return['avatar'] = 'https://secure.gravatar.com/avatar/' . md5(strtolower($email)) . '?s=112&d=mm';
 
     if ($_POST['login_type'] === 'fbuser' && !empty($_POST['avatar']))
     {
-        //$return['avatar'] = 'http://graph.facebook.com/' . $fb_id . '/picture?width=40&height=40';
         $return['avatar'] = $_POST['avatar'];
     }
     if ($_POST['login_type'] === 'twuser' && !empty($_POST['avatar']))

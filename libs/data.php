@@ -10,6 +10,7 @@ define('ROW_FIRSTNAME', 'firstname');
 define('ROW_LASTNAME', 'lastname');
 define('ROW_BIRTHDAY', 'birthday');
 define('ROW_MAIL', 'email');
+define('ROW_NICKNAME', 'nickname');
 define('ROW_NEWSLETTER', 'newsletter');
 define('ROW_REMINDER', 'reminder');
 define('ROW_OPTIN_REMINDER', 'optin_reminder');
@@ -73,6 +74,7 @@ try
                 " . ROW_LASTNAME . " = :" . ROW_LASTNAME . ",
                 " . ROW_BIRTHDAY . " = FROM_UNIXTIME(:" . ROW_BIRTHDAY . "),
                 " . ROW_MAIL . " = :" . ROW_MAIL . ",
+                " . ROW_NICKNAME . " = :" . ROW_NICKNAME . ",
                 " . ROW_NEWSLETTER . " = :" . ROW_NEWSLETTER . ",
                 " . ROW_REMINDER . " = :" . ROW_REMINDER . ",
                 " . ROW_TERMS . " = :" . ROW_TERMS . ",
@@ -85,6 +87,7 @@ try
                 " . ROW_LASTNAME . " = :" . ROW_LASTNAME . ",
                 " . ROW_BIRTHDAY . " = FROM_UNIXTIME(:" . ROW_BIRTHDAY . "),
                 " . ROW_MAIL . " = :" . ROW_MAIL . ",
+                " . ROW_NICKNAME . " = :" . ROW_NICKNAME . ",
                 " . ROW_NEWSLETTER . " = :" . ROW_NEWSLETTER . ",
                 " . ROW_REMINDER . " = :" . ROW_REMINDER . ",
                 " . ROW_OPTIN_REMINDER . " = :" . ROW_OPTIN_REMINDER . ",
@@ -103,6 +106,7 @@ try
     $stmt->bindParam(':' . ROW_LASTNAME, $data[ROW_LASTNAME], PDO::PARAM_STR);
     $stmt->bindParam(':' . ROW_BIRTHDAY, $data[ROW_BIRTHDAY], PDO::PARAM_INT);
     $stmt->bindParam(':' . ROW_MAIL, $data[ROW_MAIL], PDO::PARAM_STR);
+    $stmt->bindParam(':' . ROW_NICKNAME, $data[ROW_NICKNAME], PDO::PARAM_STR);
     $stmt->bindParam(':' . ROW_NEWSLETTER, $data[ROW_NEWSLETTER], PDO::PARAM_INT);
     $stmt->bindParam(':' . ROW_REMINDER, $data[ROW_REMINDER], PDO::PARAM_INT);
     $stmt->bindParam(':' . ROW_OPTIN_REMINDER, $data[ROW_OPTIN_REMINDER], PDO::PARAM_INT);

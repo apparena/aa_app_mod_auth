@@ -1,23 +1,20 @@
-<% if(showSocialConnect !== '' && showMailConnect !== '') { %>
-<div class="heading"><%= _.t('social_connect_headline') %></div>
-<%
-}
-
-if(_.aa.env.device.type === 'mobile' && _.aa.env.browser.name === 'other' && _.aa.env.browser.platform === 'mac'){
-print(showMailConnect);
+        <header class="text-align-center">
+            <h4><%= _.t('social_connect_headline') %></h4>
+        </header>
+<% if(_.aa.env.device.type === 'mobile' && _.aa.env.browser.name === 'other' && _.aa.env.browser.platform === 'mac'){
+print(showMail);
 } else {
-print(showSocialConnect);
-}
+print(showSocial);
+} %>
 
-if(showSocialConnect !== '' && showMailConnect !== '') {
-%>
-<div class="heading"><%= _.t('internal_login_headline') %></div>
-<%
-}
+        <div class="or">
+            <div>
+                <span><%= _.t('or_seperator') %></span>
+            </div>
+        </div>
 
-if(_.aa.env.device.type === 'mobile' && _.aa.env.browser.name === 'other' && _.aa.env.browser.platform === 'mac'){
-print(showSocialConnect);
+<% if(_.aa.env.device.type === 'mobile' && _.aa.env.browser.name === 'other' && _.aa.env.browser.platform === 'mac'){
+print(showSocial);
 } else {
-print(showMailConnect);
-}
-%>
+print(showMail);
+} %>

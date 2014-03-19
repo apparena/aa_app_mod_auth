@@ -1,4 +1,4 @@
-        <form id="form-login" class="no-margin" onsubmit="return false;">
+        <form id="form-register" class="no-margin" onsubmit="return false;">
            <fieldset>
             <div class="form-group no-margin">
                 <label for="mail"><%= _.t('email') %></label>
@@ -7,7 +7,7 @@
                     <span class="input-group-addon">
                         <i class="eicon-user"></i>
                     </span>
-                    <input type="email" name="mail" id="mail" class="form-control input-lg" placeholder="<%= _.t('ph_email') %>" value="" required autocomplete="on"/>
+                    <input type="email" name="mail" id="mail" class="form-control input-lg" placeholder="<%= _.t('ph_email') %>" value="" required autocomplete="on" />
                 </div>
             </div>
             <div class="form-group no-margin">
@@ -19,6 +19,16 @@
                     </span>
                     <input type="password" name="password" id="password" class="form-control input-lg" placeholder="<%= _.t('ph_password') %>" value="" required />
                 </div>
+            </div>
+            <div id="pw_repeat" class="form-group no-margin">
+               <label for="password_repeat"><%= _.t('password_repeat') %></label>
+
+               <div class="input-group input-group-lg">
+                    <span class="input-group-addon">
+                    <i class="fa fa-lock"></i>
+                    </span>
+                   <input type="password" name="password_repeat" id="password_repeat" class="form-control input-lg" placeholder="<%= _.t('ph_password') %>" value="" required />
+               </div>
             </div>
            </fieldset>
 
