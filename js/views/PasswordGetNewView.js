@@ -14,7 +14,7 @@ define([
         View.namespace = 'authGetNewPassword';
 
         View.code = Backbone.View.extend({
-            el: $('.content-wrapper'),
+            el: $('.content'),
 
             events: {
                 'click #submit-getnewpw': 'submit'

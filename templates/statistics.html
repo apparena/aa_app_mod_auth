@@ -1,0 +1,59 @@
+<section class="widget" id="statistics">
+    <header>
+        <div class="list-group users-list-group">
+            <a href="#page/profile" class="list-group-item">
+                <img src="" alt="" class="img-circle"/>
+                <h5 class="no-margin"><%= _.t('your_stats') %></h5>
+                <small class="text-muted"><%= _.t('click_info') %></small>
+            </a>
+        </div>
+    </header>
+    <div class="body">
+        <div class="">
+            <div class="box">
+                <div class="big-text">
+                <% if ( typeof rank_user_curr_t != "undefined" && typeof rank_user_curr_t != 0 ) { %>
+                    <% if ( rank_user_curr_t / rank_user_prev_t < 1 ) { %>
+                        <i class="fa fa-chevron-up text-success"></i>
+                    <% } else if ( rank_user_curr_t / rank_user_prev_t > 1 ) { %>
+                        <i class="fa fa-chevron-down text-danger"></i>
+                    <% } else if ( rank_user_curr_t / rank_user_prev_t === 1 ) { %>
+                        <i class="fa fa-minus text-info"></i>
+                    <% } %>
+                <%= rank_user_curr_t %>. <%= _.t('rank') %>
+                 </div>
+                <% } else { %>
+                    -
+                </div>
+                <div class="description">
+                    <%= _.t('no_score_info') %>
+                </div>
+                <% } %>
+            </div>
+        </div>
+        <div class="">
+            <div class="box">
+                <div class="big-text">
+                    <% if ( typeof score_total_u != "undefined" && typeof score_total_u != 0 ) { %>
+                    <%= score_total_u %>
+                    <% } else { %>
+                    -
+                    <% } %>
+                </div>
+                <div class="description">
+                    <i class="fa fa-check-circle"></i>
+                    <%= _.t('score_total') %>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <a class="button">
+            <button type="button" data-loading-text="<%= _.t('loading_state') %>" id="stats-button" class="btn btn-transparent btn-block">
+                <%= _.t('show_my_stats') %>
+            </button>
+        </a>
+    </div>
+</section>
+
+

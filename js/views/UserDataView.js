@@ -3,14 +3,16 @@ define([
     'jquery',
     'underscore',
     'backbone',
-    'modules/aa_app_mod_auth/js/models/UserDataModel'
-], function (View, $, _, Backbone, UserDataModel) {
+    'modules/aa_app_mod_auth/js/models/UserDataModel',
+    'modules/aa_app_mod_auth/js/models/LoginModel'
+], function (View, $, _, Backbone, UserDataModel, LoginModel) {
     'use strict';
 
     return function () {
         View.namespace = 'authParticipation';
 
         View.code = Backbone.View.extend({
+
             tagName: 'div',
 
             className: 'participate-container',
@@ -43,8 +45,8 @@ define([
                         //_.debug.warn('add', key, value);
                         that.user_data_model.set(key, value);
                     }/* else {
-                        _.debug.info(key + ' exist:', that.user_data_model.get(key), value);
-                    }*/
+                     _.debug.info(key + ' exist:', that.user_data_model.get(key), value);
+                     }*/
                     return true;
                 });
             },
@@ -92,8 +94,6 @@ define([
                 if (this.model.get('uid') === '0') {
                     this.goTo('');
                 }
-
-                //_.debug.log('BAHM', this.user_data_model.updateFromDatabase);
 
                 if (this.user_data_model.updateFromDatabase === true) {
                     // get userdata from database
@@ -150,7 +150,7 @@ define([
 
                     });
                 } else {
-                    //_.debug.log('NO updateFromDatabase');
+                    _.debug.log('NO updateFromDatabase');
                     this.checkUserdata();
                 }
 
@@ -190,7 +190,8 @@ define([
                     address:  false,
                     field1:   false,
                     field2:   false,
-                    field3:   false
+                    field3:   false,
+                    nickname: false
                 };
 
                 if (required_selection.indexOf('name') !== -1) {
@@ -211,12 +212,17 @@ define([
                 if (required_selection.indexOf('field3') !== -1) {
                     this.required.field3 = true;
                 }
+                if (required_selection.indexOf('nickname') !== -1) {
+                    this.required.name = true;
+                }
                 this.defineTemplateInformation();
                 return this;
             },
 
             defineTemplateInformation: function () {
-                var email = this.user_data_model.get('email');
+                this.loginModel = LoginModel().init();
+                this.loginModel.fetch();
+                var email = this.loginModel.get('email');
 
                 /*if (this.model.get('login_type') === 'twuser' || this.model.get('login_type') === 'gpuser') {
                  email = '';
@@ -254,6 +260,9 @@ define([
                         lastname:  {
                             required: this.required.name
                         },
+                        nickname:  {
+                            required: this.required.nickname
+                        },
                         birthday:  {
                             required: this.required.birthday
                         },
@@ -277,6 +286,9 @@ define([
                         },
                         terms:     {
                             required: true
+                        },
+                        gender: {
+                            required: this.required.gender
                         }
                     },
 
@@ -287,6 +299,7 @@ define([
                         },
                         firstname: _.t('msg_require_firstname'),
                         lastname:  _.t('msg_require_lastname'),
+                        nickname:  _.t('msg_require_nickname'),
                         birthday:  _.t('msg_require_birthday'),
                         street:    _.t('msg_require_street'),
                         zip:       _.t('msg_require_zip'),
@@ -312,6 +325,8 @@ define([
 
                 // implement data into model
                 this.user_data_model.set(data);
+                console.log(data);
+                console.log(this.user_data_model);
                 this.user_data_model.save();
 
                 // save userdate to database
