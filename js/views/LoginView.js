@@ -180,8 +180,8 @@ define([
                         // add content and define new element
                         that.$el.append(compiledModalTemplate);
                         that.setElement(that.$('#' + that.data.modal_id));
-                        that.$('.modal-body-wrapper').append(compiledLoginTemplate);
-                        //that.$('.modal-body-wrapper').append(compiledRegisterTemplate);
+                        that.$('.login-body').html(compiledLoginTemplate);
+                        that.$('.register-body').html(compiledRegisterTemplate);
                         that.setDoorModalObject();
                     }
 

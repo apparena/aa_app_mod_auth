@@ -13,20 +13,45 @@
                 </div>
             </div>
             <div class="modal-body">
-                <div class="modal-body-wrapper">
-                    <!-- PUT YOU CONTENT HERE WITH JS -->
-                </div>
-            </div>
+                <section class="widget widget-tabs">
 
-            <div class="modal-footer">
-                <div class="modal-footer-wrapper">
-                    <% _.each(buttons, function(value, key) { if(_.isUndefined(value.data)) { value.data = ''; }
+                    <header>
+                        <ul class="nav nav-tabs">
+                            <li class="active">
+                                <a href="#login" data-toggle="tab"><%= _.t('login') %></a>
+                            </li>
+                            <li>
+                                <a href="#create" data-toggle="tab"><%= _.t('register') %></a>
+                            </li>
+                        </ul>
+                    </header>
 
-                    if(value.btn_type === 'button') { %>
-                    <button type="<%- value.btn_type %>" class="btn <%- value.btn_class%>" id="<%- value.btn_id %>"
-                    <%= value.data %>><%= value.btn_text %></button><% } else { %>
-                    <a class="<%- value.btn_class%>" id="<%- value.btn_id %>" <%- value.data %>><%= value.btn_text %> </a><% } }); %>
-                </div>
+                    <div class="body tab-content">
+                        <div id="login" class="tab-pane active clearfix">
+                            <section class="widget login-widget login-tab">
+                                <header class="text-align-center">
+                                    <h4><%= _.t('login_headline') %></h4>
+                                </header>
+
+                                <div class="login-body">
+                                    <!-- PUT YOU CONTENT HERE WITH JS -->
+                                </div>
+                            </section>
+                        </div>
+                        <div id="create" class="tab-pane">
+                            <section class="widget login-widget login-tab">
+                                <header class="text-align-center">
+                                    <h4><%= _.t('create_account_headline') %></h4>
+                                </header>
+
+                                <div class="register-body">
+                                    <!-- PUT YOU CONTENT HERE WITH JS -->
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+
+                </section>
             </div>
         </div>
     </div>
