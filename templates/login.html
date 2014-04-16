@@ -1,20 +1,15 @@
-        <header class="text-align-center">
-            <h4><%= _.t('social_connect_headline') %></h4>
-        </header>
-<% if(_.aa.env.device.type === 'mobile' && _.aa.env.browser.name === 'other' && _.aa.env.browser.platform === 'mac'){
-print(showMail);
-} else {
-print(showSocial);
-} %>
+<%= showSocialConnect %>
 
-        <div class="or">
-            <div>
-                <span><%= _.t('or_seperator') %></span>
-            </div>
-        </div>
+<%
+if(showMailConnect !== '' && showSocialConnect !== '') {
+%>
+<div class="or">
+    <div>
+        <span><%= _.t('or') %></span>
+    </div>
+</div>
+<%
+}
+%>
 
-<% if(_.aa.env.device.type === 'mobile' && _.aa.env.browser.name === 'other' && _.aa.env.browser.platform === 'mac'){
-print(showSocial);
-} else {
-print(showMail);
-} %>
+<%= showMailConnect %>

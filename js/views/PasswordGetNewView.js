@@ -4,23 +4,24 @@ define([
     'underscore',
     'backbone',
     'text!modules/aa_app_mod_auth/templates/passwordGetNew.html',
+    'text!modules/aa_app_mod_auth/templates/passwordGetNewInvalidSecret.html',
     'modules/aa_app_mod_auth/js/models/PasswordLostModel',
     'jquery.validator_config',
     'jquery.serialize_object'
-], function (View, $, _, Backbone, PasswordGetNewTemplate, PasswordLostModel) {
+], function (View, $, _, Backbone, PasswordGetNewTemplate, passwordGetNewInvalidSecretTemplate, PasswordLostModel) {
     'use strict';
 
     return function () {
         View.namespace = 'authGetNewPassword';
 
         View.code = Backbone.View.extend({
-            el: $('.content'),
+            el: $('.content-wrapper'),
 
             events: {
                 'click #submit-getnewpw': 'submit'
             },
 
-            moduleName: 'auth',
+            moduleName: 'aa_app_mod_auth',
 
             initialize: function (settings) {
                 _.bindAll(this, 'render', 'redirectToPwLost', 'submit', 'callbackHandler');
@@ -35,26 +36,30 @@ define([
             },
 
             render: function () {
-                var secret_id = this.ajax({
+                var that = this;
+
+                this.ajax({
                     module: this.moduleName,
                     action: 'getPasswortSecretId',
                     secret: this.secret
+                }, true, function (secret_id) {
+                    that.passwordLostModel = PasswordLostModel().init({init: true});
+
+                    if (secret_id.data.message !== that.secret) {
+                        //that.redirectToPwLost();
+                        that.template = _.template(passwordGetNewInvalidSecretTemplate, {});
+                    } else {
+                        that.template = _.template(PasswordGetNewTemplate, {
+                            'secret_id': that.secret,
+                            'email':     that.passwordLostModel.get('email')
+                        });
+                    }
+
+                    that.$el.html(that.template);
+
+                    // redirect to get the same body class like the password call page
+                    that.goTo('call/auth-password');
                 });
-
-                this.passwordLostModel = PasswordLostModel().init();
-
-                if (secret_id.data.message !== this.secret) {
-                    this.redirectToPwLost();
-                }
-
-                this.template = _.template(PasswordGetNewTemplate, {
-                    'secret_id': this.secret,
-                    'email':     this.passwordLostModel.get('email')
-                });
-                this.$el.html(this.template);
-
-                // redirect to get the same body class like the password call page
-                this.goTo('call/auth-password');
             },
 
             redirectToPwLost: function () {

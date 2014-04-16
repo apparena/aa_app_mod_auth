@@ -1,0 +1,15 @@
+<%= showSocialRegister %>
+
+<%
+if(showSocialRegister !== '' && showMailRegister !== '') {
+%>
+<div class="or">
+    <div>
+        <span><%= _.t('or') %></span>
+    </div>
+</div>
+<%
+}
+%>
+
+<%= showMailRegister %>

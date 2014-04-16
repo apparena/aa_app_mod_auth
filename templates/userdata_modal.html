@@ -155,7 +155,7 @@
 
                     <div class="form-group">
                         <div class="col-sm-offset-3 col-xs-12">
-                            <% if(_.c('mod_newsletter_activated') === '1') { %>
+                            <% if(_.c('mod_newsletter_activated') === '1' || _.c('mod_newsletter_activated') === 'y') { %>
                             <div class="checkbox">
                                 <label class="input-append">
                                     <input type="checkbox" name="newsletter" id="newsletter" <%= (user_data.newsletter === 'true')?'checked':'' %> /> <%= _.t('nl_subscribe') %>
