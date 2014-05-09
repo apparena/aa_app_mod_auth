@@ -9,16 +9,16 @@
             <header>
                 <ul class="nav nav-tabs">
                     <li class="active">
-                        <a href="#login" data-toggle="tab"><%= _.t('login') %></a>
+                        <a href="#create" data-toggle="tab"><%= _.t('register') %></a>
                     </li>
                     <li>
-                        <a href="#create" data-toggle="tab"><%= _.t('register') %></a>
+                        <a href="#login" data-toggle="tab"><%= _.t('login') %></a>
                     </li>
                 </ul>
             </header>
 
             <div class="body tab-content">
-                <div id="login" class="tab-pane active clearfix">
+                <div id="login" class="tab-pane">
                     <section class="widget login-widget login-tab">
                         <header class="text-align-center">
                             <h4><%= _.t('login_headline') %></h4>
@@ -29,7 +29,7 @@
                         </div>
                     </section>
                 </div>
-                <div id="create" class="tab-pane">
+                <div id="create" class="tab-pane active">
                     <section class="widget login-widget login-tab">
                         <header class="text-align-center">
                             <h4><%= _.t('create_account_headline') %></h4>

@@ -180,8 +180,8 @@ define([
                         // add content and define new element
                         that.$el.append(compiledModalTemplate);
                         that.setElement(that.$('#' + that.data.modal_id));
-                        that.$('.login-body').html(compiledLoginTemplate);
-                        that.$('.register-body').html(compiledRegisterTemplate);
+                        that.$('.modal-body-wrapper').append(compiledLoginTemplate);
+                        //that.$('.modal-body-wrapper').append(compiledRegisterTemplate);
                         that.setDoorModalObject();
                     }
 
@@ -213,7 +213,7 @@ define([
                         'modules/aa_app_mod_facebook/js/views/FacebookView',
                         'modules/aa_app_mod_facebook/js/models/LoginModel'
                     ], function (Facebook, LoginModel) {
-                        that.facebook = Facebook().init();
+                        that.facebook = Facebook().init({init: true});
                         that.facebook.addClickEventListener();
                         that.facebookLoginModel = LoginModel().init();
                         that.listenTo(that.facebookLoginModel, 'change:logintime', that.fbLoginDone);
@@ -224,8 +224,7 @@ define([
                         'modules/aa_app_mod_twitter/js/views/TwitterView',
                         'modules/aa_app_mod_twitter/js/models/LoginModel'
                     ], function (Twitter, LoginModel) {
-                        that.twitter = Twitter().init();
-                        that.twitter.addClickEventListener();
+                        that.twitter = Twitter().init({init: true});
                         that.twitterLoginModel = LoginModel().init();
                         that.listenTo(that.twitterLoginModel, 'change:logintime', that.twLoginDone);
                     });
@@ -235,7 +234,7 @@ define([
                         'modules/aa_app_mod_google/js/views/GoogleView',
                         'modules/aa_app_mod_google/js/models/LoginModel'
                     ], function (Google, LoginModel) {
-                        that.google = Google().init();
+                        that.google = Google().init({init: true});
                         that.google.addClickEventListener();
                         that.googleLoginModel = LoginModel().init();
                         that.listenTo(that.googleLoginModel, 'change:logintime', that.gpLoginDone);
@@ -295,13 +294,18 @@ define([
                 var form = this.btn.closest('.form-auth'),
                     data = (form) ? form.serializeObject() : {};
 
+                // add new validation method
+                $.validator.addMethod('password_must_same', function (value, element) {
+                    return form.find('#password').val() === value;
+                }, 'Passwords are not the same');
+
                 form.validate({
                     //debug: true,
-                    errorPlacement: function(error, element) {
+                    errorPlacement: function (error, element) {
                         error.insertBefore(element.parent()).prev('label').hide();
                     },
 
-                    success: function(label) {
+                    success: function (label) {
                         label.parent().find('label').show();
                     },
 
@@ -316,6 +320,10 @@ define([
                         password: {
                             required:  true,
                             minlength: 3
+                        },
+
+                        password2: {
+                            password_must_same: true
                         }
                     },
 
@@ -328,7 +336,9 @@ define([
                         password: {
                             required:  _.t('msg_require_password'),
                             minlength: $.format(_.t('msg_require_password_format'))
-                        }
+                        },
+
+                        password2: _.t('msg_require_password_again')
                     }
                 });
 
@@ -406,8 +416,7 @@ define([
                     this.tmpUserData = data.user_data;
                     this.tmpUserData.additional = $.parseJSON(this.tmpUserData.additional);
 
-                    if(!_.isUndefined(data.avatar.avatars))
-                    {
+                    if (!_.isUndefined(data.avatar.avatars)) {
                         data.avatar.avatars = $.parseJSON(data.avatar.avatars);
                     }
 
@@ -603,7 +612,7 @@ define([
 
                     $('.nav-profile').removeClass('hide');
 
-                    if(!_.isUndefined(avatar.avatars)) {
+                    if (!_.isUndefined(avatar.avatars)) {
                         $('.nav-profile').find('img').attr('src', avatar.avatars[avatar.selected])
                     }
 
@@ -633,5 +642,5 @@ define([
         });
 
         return View;
-    }
+    };
 });
