@@ -13,7 +13,7 @@ define([
         View.namespace = 'authPasswordLost';
 
         View.code = Backbone.View.extend({
-            el: $('.content'),
+            el: $('.content-wrapper'),
 
             events: {
                 'click #submit-pwlost': 'submit'

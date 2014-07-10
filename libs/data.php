@@ -2,6 +2,7 @@
 defined('_VALID_CALL') or die('Direct Access is not allowed.');
 
 define('TBL_MAIN', 'mod_auth_user_data');
+define('TBL_AVATARS', 'mod_auth_user_avatar');
 
 define('ROW_AMOUNT', 8);
 
@@ -10,7 +11,6 @@ define('ROW_FIRSTNAME', 'firstname');
 define('ROW_LASTNAME', 'lastname');
 define('ROW_BIRTHDAY', 'birthday');
 define('ROW_MAIL', 'email');
-define('ROW_NICKNAME', 'nickname');
 define('ROW_NEWSLETTER', 'newsletter');
 define('ROW_REMINDER', 'reminder');
 define('ROW_OPTIN_REMINDER', 'optin_reminder');
@@ -18,6 +18,8 @@ define('ROW_TERMS', 'terms');
 define('ROW_ADDITIONAL', 'additional');
 define('ROW_LAST_UPDATE', 'last_update');
 define('ROW_DATE_ADDED', 'date_added');
+
+define('ROW_AVATARS', 'avatars');
 
 try
 {
@@ -59,7 +61,7 @@ try
     {
         $time               = strtotime($data[ROW_BIRTHDAY]);
         $time               = date('Y-m-d', $time);
-        $birthday           = new DateTime($time, new DateTimeZone($aa_default_timezone));
+        $birthday           = new DateTime($time, new DateTimeZone(APP_BASIC_TIMEZONE));
         $data[ROW_BIRTHDAY] = $birthday->getTimestamp();
     }
 
@@ -74,7 +76,6 @@ try
                 " . ROW_LASTNAME . " = :" . ROW_LASTNAME . ",
                 " . ROW_BIRTHDAY . " = FROM_UNIXTIME(:" . ROW_BIRTHDAY . "),
                 " . ROW_MAIL . " = :" . ROW_MAIL . ",
-                " . ROW_NICKNAME . " = :" . ROW_NICKNAME . ",
                 " . ROW_NEWSLETTER . " = :" . ROW_NEWSLETTER . ",
                 " . ROW_REMINDER . " = :" . ROW_REMINDER . ",
                 " . ROW_TERMS . " = :" . ROW_TERMS . ",
@@ -87,7 +88,6 @@ try
                 " . ROW_LASTNAME . " = :" . ROW_LASTNAME . ",
                 " . ROW_BIRTHDAY . " = FROM_UNIXTIME(:" . ROW_BIRTHDAY . "),
                 " . ROW_MAIL . " = :" . ROW_MAIL . ",
-                " . ROW_NICKNAME . " = :" . ROW_NICKNAME . ",
                 " . ROW_NEWSLETTER . " = :" . ROW_NEWSLETTER . ",
                 " . ROW_REMINDER . " = :" . ROW_REMINDER . ",
                 " . ROW_OPTIN_REMINDER . " = :" . ROW_OPTIN_REMINDER . ",
@@ -106,7 +106,6 @@ try
     $stmt->bindParam(':' . ROW_LASTNAME, $data[ROW_LASTNAME], PDO::PARAM_STR);
     $stmt->bindParam(':' . ROW_BIRTHDAY, $data[ROW_BIRTHDAY], PDO::PARAM_INT);
     $stmt->bindParam(':' . ROW_MAIL, $data[ROW_MAIL], PDO::PARAM_STR);
-    $stmt->bindParam(':' . ROW_NICKNAME, $data[ROW_NICKNAME], PDO::PARAM_STR);
     $stmt->bindParam(':' . ROW_NEWSLETTER, $data[ROW_NEWSLETTER], PDO::PARAM_INT);
     $stmt->bindParam(':' . ROW_REMINDER, $data[ROW_REMINDER], PDO::PARAM_INT);
     $stmt->bindParam(':' . ROW_OPTIN_REMINDER, $data[ROW_OPTIN_REMINDER], PDO::PARAM_INT);
@@ -119,6 +118,47 @@ try
         $return['code']    = 200;
         $return['status']  = 'success';
         $return['message'] = 'data successfully stored';
+
+        /**
+         * update user avatar
+         */
+        // first get all user avatars
+        $sql = "SELECT
+                    " . ROW_AVATARS . "
+                FROM
+                    " . TBL_AVATARS . "
+                WHERE
+                    " . ROW_AUTH_UID . " = :" . ROW_AUTH_UID . "
+                LIMIT 1
+                ";
+
+        $stmt = $db->prepare($sql);
+        $stmt->bindParam(':' . ROW_AUTH_UID, $data[ROW_AUTH_UID], PDO::PARAM_INT);
+        $stmt->execute();
+
+        $avatars = $stmt->fetchObject();
+        $key     = ROW_AVATARS;
+        $avatars = json_decode($avatars->$key, true);
+
+        $avatars['gravatar'] = 'https://secure.gravatar.com/avatar/' . md5(strtolower($data[ROW_MAIL])) . '?d=mm';
+
+        // now update the gravatar one
+        $sql = "UPDATE
+                    " . TBL_AVATARS . "
+                SET
+                    " . ROW_AVATARS . " = :" . ROW_AVATARS . "
+                WHERE
+                    " . ROW_AUTH_UID . " = :" . ROW_AUTH_UID . "
+                ";
+
+        $avatars = json_encode($avatars);
+        $stmt    = $db->prepare($sql);
+
+        //pr(str_replace(array(":" . ROW_AVATARS, ":" . ROW_AUTH_UID), array("'" . $avatars . "'", "'" . $data[ROW_AUTH_UID] . "'"), $stmt->queryString));
+
+        $stmt->bindParam(':' . ROW_AVATARS, $avatars, PDO::PARAM_STR);
+        $stmt->bindParam(':' . ROW_AUTH_UID, $data[ROW_AUTH_UID], PDO::PARAM_INT);
+        $stmt->execute();
     }
 }
 catch (Exception $e)

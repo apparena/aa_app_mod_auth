@@ -3,75 +3,54 @@ define([
     'jquery',
     'underscore',
     'backbone',
-    'pace',
     'modules/aa_app_mod_auth/js/models/LoginModel',
-    'modules/aa_app_mod_auth/js/models/UserModel',
     'text!modules/aa_app_mod_auth/templates/login.html',
+    'text!modules/aa_app_mod_auth/templates/register.html',
     'jquery.validator_config',
     'jquery.serialize_object'
-], function (View, $, _, Backbone, pace, LoginModel, UserModel, LoginTemplate) {
+], function (View, $, _, Backbone, LoginModel, LoginTemplate, RegisterTemplate) {
     'use strict';
 
     return function () {
         View.namespace = 'authLogin';
 
         View.code = Backbone.View.extend({
-            el: 'body',
+            el: $('body'),
 
-            enableKeyPress: false,
+            enableKeypress: false,
 
-            redirection: '#',
+            redirection: '',
 
             events: {
                 'click #sign-in': 'mailLogin',
-                'keypress :input':   'checkKeyPress'
+                'click #sign-up': 'mailLogin',
+                'keyup :input':   'checkKeypress'
             },
 
             tmpUserData: null,
 
             initialize: function () {
-                this.loader();
-                $('.navItem').removeClass('active');
-                _.bindAll(this, 'render', 'loader', 'setDoorModalObject', 'addRedirection', 'renderPage', 'loginProcess', 'addSocialLogin', 'mailLogin', 'fbLoginDone', 'twLoginDone', 'gpLoginDone');
+                _.bindAll(this, 'render', 'setDoorModalObject', 'addRedirection', 'renderModal', 'openModal', 'renderPage', 'loginProcess', 'addSocialLogin', 'mailLogin', 'fbLoginDone', 'twLoginDone', 'gpLoginDone');
+
                 this.loginModel = LoginModel().init({
                     id: 1
                 });
-
-                this.userModel = UserModel().init({
-                    id: 1
-                });
-                this.listenTo(this.userModel, 'change', this.handleNavigation);
                 this.listenTo(this.loginModel, 'change:logintime', this.handleNavigation);
 
                 this.data = {
                     'modal_id':   'sign-up-modal',
                     'headline':   _.t('login_headline'),
-                    'show_close': true,
-                    'buttons':    {
-                        /*'cancel': {
-                         'btn_class': 'back pull-left',
-                         'btn_id':    'cancel-login',
-                         'btn_text':  _.t('back'),
-                         'btn_type':  'link',
-                         'data':      'data-dismiss=modal'
-                         },*/
-                        'next': {
-                            'btn_class': 'btn-block btn-lg btn-danger',
-                            'btn_id':    'sign-in',
-                            'btn_text_register':  _.t('register_button'),
-                            'btn_text_login':  _.t('login_button'),
-                            'btn_type':  'button',
-                            'data':      'data-loading-text="' + _.t('loading') + ' ' + _.escape('<i class="icon-spinner icon-spin"></i>') + '"'
-                        }
-                    }
+                    'show_close': true
                 };
             },
 
             render: function () {
                 // set/revert basic element
                 this.setElement($('body'));
-                var showSocialLogin = '', showMailLogin = '';
-                var showSocialConnect = '', showMailConnect = '';
+                var showSocialConnect = '',
+                    showMailConnect = '',
+                    showSocialRegister = '',
+                    showMailRegister = '';
 
                 this.dependencies = {};
 
@@ -79,16 +58,15 @@ define([
                     _.c('login_social_networks').indexOf('twitter') !== -1 ||
                     _.c('login_social_networks').indexOf('fb') !== -1
                     ) {
-                    this.dependencies['showSocialLogin'] = 'text!modules/aa_app_mod_auth/templates/social_connect.html';
-                    this.dependencies['showSocialConnect'] = 'text!modules/aa_app_mod_auth/templates/social_register.html';
+                    this.dependencies['showSocialConnect'] = 'text!modules/aa_app_mod_auth/templates/social_connect.html';
+                    this.dependencies['showSocialRegister'] = 'text!modules/aa_app_mod_auth/templates/social_register.html';
                 }
 
                 if (_.c('login_social_networks').indexOf('email_password') !== -1) {
-                    this.dependencies['showMailLogin'] = 'text!modules/aa_app_mod_auth/templates/mail_connect.html';
-                    this.dependencies['showMailConnect'] = 'text!modules/aa_app_mod_auth/templates/mail_register.html';
+                    this.dependencies['showMailConnect'] = 'text!modules/aa_app_mod_auth/templates/mail_connect.html';
+                    this.dependencies['showMailRegister'] = 'text!modules/aa_app_mod_auth/templates/mail_register.html';
                 }
 
-                $('li.active').removeClass('active');
                 this.setDoorModalObject();
                 this.enableKeypress = true;
                 return this;
@@ -112,51 +90,119 @@ define([
                 this.pagetype = 'page';
                 this.dependencies['PageTemplate'] = 'text!modules/aa_app_mod_auth/templates/login_content_page.html';
 
-                // create dependencies array for require
+                // create dependencie array for require
                 _.each(this.dependencies, function (value) {
                     dependencies.push(value);
                 });
 
                 require(dependencies, function () {
-                    var compiledPageTemplate, compiledLoginTemplate, compiledRegisterTemplate, showSocialConnect, showMailConnect, showMailLogin, showSocialLogin, PageTemplate;
+                    var compiledPageTemplate, compiledLoginTemplate, compiledRegisterTemplate, showMailConnect, showSocialConnect, showMailRegister, showSocialRegister, PageTemplate;
 
                     // handle function arguments
                     _.each(that.dependencies, function (value, key) {
                         if (key === 'PageTemplate') {
                             PageTemplate = require(value);
-                        } else if (key === 'showSocialLogin') {
-                            showSocialLogin = require(value);
-                        } else if (key === 'showMailLogin') {
-                            showMailLogin = require(value);
                         } else if (key === 'showSocialConnect') {
                             showSocialConnect = require(value);
                         } else if (key === 'showMailConnect') {
                             showMailConnect = require(value);
+                        } else if (key === 'showSocialRegister') {
+                            showSocialRegister = require(value);
+                        } else if (key === 'showMailRegister') {
+                            showMailRegister = require(value);
                         }
                     });
 
                     compiledPageTemplate = _.template(PageTemplate, that.data);
                     compiledLoginTemplate = _.template(LoginTemplate, {
-                        showMail:   _.template(showMailLogin, {}),
-                        showSocial: _.template(showSocialLogin, {})
+                        showMailConnect:   _.template(showMailConnect, {}),
+                        showSocialConnect: _.template(showSocialConnect, {})
                     });
-                    compiledRegisterTemplate = _.template(LoginTemplate, {
-                        showMail:   _.template(showMailConnect, {}),
-                        showSocial: _.template(showSocialConnect, {})
+
+                    compiledRegisterTemplate = _.template(RegisterTemplate, {
+                        showMailRegister:   _.template(showMailRegister, {}),
+                        showSocialRegister: _.template(showSocialRegister, {})
                     });
 
                     // add content and define new element
-                    that.$('.content').html(compiledPageTemplate);
-                    that.setElement(that.$('.content'));
-                    that.$('.login-tab').prepend(compiledLoginTemplate);
-                    that.$('.register-tab').prepend(compiledRegisterTemplate);
+                    that.$('.content-wrapper').html(compiledPageTemplate);
+                    that.setElement(that.$('.content-wrapper'));
+                    that.$('.login-body').html(compiledLoginTemplate);
+                    that.$('.register-body').html(compiledRegisterTemplate);
                     that.addSocialLogin();
-
-                    $('.register_link_tab, .login_link_tab').on('click', function (e) {
-                        $('.nav-tabs li, .tab-pane').toggleClass('active');
-                    });
                 });
                 return this;
+            },
+
+            renderModal: function () {
+                var that = this,
+                    dependencies = [];
+
+                // set page type
+                this.pagetype = 'modal';
+                this.dependencies['ModalTemplate'] = 'text!modules/aa_app_mod_auth/templates/login_content_modal.html';
+
+                // create dependencie array for require
+                _.each(this.dependencies, function (value) {
+                    dependencies.push(value);
+                });
+
+                require(dependencies, function () {
+                    var compiledModalTemplate, compiledLoginTemplate, compiledRegisterTemplate, showMailConnect, showSocialConnect, showMailRegister, showSocialRegister, ModalTemplate;
+
+                    // handle function arguments
+                    _.each(that.dependencies, function (value, key) {
+                        if (key === 'ModalTemplate') {
+                            ModalTemplate = require(value);
+                        } else if (key === 'showSocialConnect') {
+                            showSocialConnect = require(value);
+                        } else if (key === 'showMailConnect') {
+                            showMailConnect = require(value);
+                        } else if (key === 'showSocialRegister') {
+                            showSocialRegister = require(value);
+                        } else if (key === 'showMailRegister') {
+                            showMailRegister = require(value);
+                        }
+                    });
+
+                    compiledModalTemplate = _.template(ModalTemplate, that.data);
+
+                    that.setDoorModalObject();
+                    if (typeof that.modal_obj === 'undefined' || that.modal_obj.length === 0) {
+                        compiledLoginTemplate = _.template(LoginTemplate, {
+                            showMailConnect:   _.template(showSocialConnect, {}),
+                            showSocialConnect: _.template(showMailConnect, {})
+                        });
+                        compiledRegisterTemplate = _.template(RegisterTemplate, {
+                            showMailRegister:   _.template(showSocialRegister, {}),
+                            showSocialRegister: _.template(showMailRegister, {})
+                        });
+                        // add content and define new element
+                        that.$el.append(compiledModalTemplate);
+                        that.setElement(that.$('#' + that.data.modal_id));
+                        that.$('.modal-body-wrapper').append(compiledLoginTemplate);
+                        //that.$('.modal-body-wrapper').append(compiledRegisterTemplate);
+                        that.setDoorModalObject();
+                    }
+
+                    that.openModal();
+                });
+                return this;
+            },
+
+            openModal: function () {
+                var that = this;
+
+                // set focus on first input field
+                this.modal_obj.on('shown.bs.modal', function () {
+                    that.modal_obj.find('input').first().focus();
+                    //$('#comment-box').hide();
+                });
+
+                this.modal_obj.modal('show');
+                this.addSocialLogin();
+
+                this.goTo('call/login/modal');
             },
 
             addSocialLogin: function () {
@@ -167,34 +213,31 @@ define([
                         'modules/aa_app_mod_facebook/js/views/FacebookView',
                         'modules/aa_app_mod_facebook/js/models/LoginModel'
                     ], function (Facebook, LoginModel) {
-                        that.facebook = Facebook().init();
+                        that.facebook = Facebook().init({init: true});
                         that.facebook.addClickEventListener();
                         that.facebookLoginModel = LoginModel().init();
-                        that.listenTo(that.facebookLoginModel, 'change:logintime', that.fbLoginDone)
+                        that.listenTo(that.facebookLoginModel, 'change:logintime', that.fbLoginDone);
                     });
                 }
-
                 if (_.c('login_social_networks').indexOf('twitter') !== -1) {
                     require([
                         'modules/aa_app_mod_twitter/js/views/TwitterView',
                         'modules/aa_app_mod_twitter/js/models/LoginModel'
                     ], function (Twitter, LoginModel) {
-                        that.twitter = Twitter().init();
-                        that.twitter.addClickEventListener();
+                        that.twitter = Twitter().init({init: true});
                         that.twitterLoginModel = LoginModel().init();
-                        that.listenTo(that.twitterLoginModel, 'change:logintime', that.twLoginDone)
+                        that.listenTo(that.twitterLoginModel, 'change:logintime', that.twLoginDone);
                     });
                 }
-
                 if (_.c('login_social_networks').indexOf('gplus') !== -1) {
                     require([
                         'modules/aa_app_mod_google/js/views/GoogleView',
                         'modules/aa_app_mod_google/js/models/LoginModel'
                     ], function (Google, LoginModel) {
-                        that.google = Google().init();
+                        that.google = Google().init({init: true});
                         that.google.addClickEventListener();
                         that.googleLoginModel = LoginModel().init();
-                        that.listenTo(that.googleLoginModel, 'change:logintime', that.gpLoginDone)
+                        that.listenTo(that.googleLoginModel, 'change:logintime', that.gpLoginDone);
                     });
                 }
             },
@@ -203,11 +246,11 @@ define([
                 // store some fb data in login model
                 this.loginModel.set({
                     login_type: this.facebookLoginModel.get('login_type'),
+                    type:       'social',
                     sid:        this.facebookLoginModel.get('fbid'),
                     email:      this.facebookLoginModel.get('email'),
                     password:   '',
-                    avatar:     'https://graph.facebook.com/' + this.facebookLoginModel.get('fbid') + '/picture?width=128&height=128',
-                    user_name:  this.facebookLoginModel.get('firstname')
+                    avatar:     'https://graph.facebook.com/' + this.facebookLoginModel.get('fbid') + '/picture?width=100&height=100'
                 });
 
                 this.loginProcess();
@@ -218,11 +261,11 @@ define([
                 // store some tw data in login model
                 this.loginModel.set({
                     login_type: this.twitterLoginModel.get('login_type'),
+                    type:       'social',
                     sid:        this.twitterLoginModel.get('twid'),
                     email:      this.twitterLoginModel.get('email'),
                     password:   '',
-                    avatar:     this.twitterLoginModel.get('avatar'),
-                    user_name:  this.twitterLoginModel.get('screen_name')
+                    avatar:     this.twitterLoginModel.get('avatar')
                 });
 
                 this.loginProcess();
@@ -233,12 +276,11 @@ define([
                 // store some gp data in login model
                 this.loginModel.set({
                     login_type: this.googleLoginModel.get('login_type'),
+                    type:       'social',
                     sid:        this.googleLoginModel.get('gpid'),
                     email:      this.googleLoginModel.get('email'),
-                    //email:      '',
                     password:   '',
-                    avatar:     this.googleLoginModel.get('avatar'),
-                    user_name:  this.googleLoginModel.get('nickname')
+                    avatar:     this.googleLoginModel.get('avatar')
                 });
 
                 this.loginProcess();
@@ -247,101 +289,58 @@ define([
 
             mailLogin: function (element) {
                 // get form data
-                var form = $('.tab-pane.active').find('form'),
-                    data = (form) ? form.serializeObject() : {};
-
                 this.btn = $(element.currentTarget);
 
-                if(form.attr('id') === 'form-login'){
-                    form.validate({
+                var form = this.btn.closest('.form-auth'),
+                    data = (form) ? form.serializeObject() : {};
 
-                        /* errorPlacement: function(error, element) {
-                         error.insertBefore(element.parent()).prev('label').hide();
-                         },
+                // add new validation method
+                $.validator.addMethod('password_must_same', function (value, element) {
+                    return form.find('#password').val() === value;
+                }, 'Passwords are not the same');
 
-                         errorElement: 'label',
-                         */
-                        rules: {
-                            mail: {
-                                required: true,
-                                email:    true
-                            },
+                form.validate({
+                    //debug: true,
+                    errorPlacement: function (error, element) {
+                        error.insertBefore(element.parent()).prev('label').hide();
+                    },
 
-                            password: {
-                                required:  true,
-                                minlength: 6
-                            }
+                    success: function (label) {
+                        label.parent().find('label').show();
+                    },
 
+                    errorElement: 'label',
+
+                    rules: {
+                        email: {
+                            required: true,
+                            email:    true
                         },
 
-                        messages: {
-                            mail: {
-                                required: _.t('msg_require_mail'),
-                                email:    _.t('msg_require_mail_format')
-                            },
+                        password: {
+                            required:  true,
+                            minlength: 3
+                        },
 
-                            password: {
-                                required:  _.t('msg_require_password'),
-                                minlength: $.format(_.t('msg_require_password_format'))
-                            }
+                        password2: {
+                            password_must_same: true
                         }
-                    });
+                    },
 
-                } else {
-                    form.validate({
-
-                        errorPlacement: function(error, element) {
-                            error.insertBefore(element.parent()).prev('label').hide();
+                    messages: {
+                        email: {
+                            required: _.t('msg_require_mail'),
+                            email:    _.t('msg_require_mail_format')
                         },
 
-                        success: function(label) {
-                            label.parent().find('label').show();
+                        password: {
+                            required:  _.t('msg_require_password'),
+                            minlength: $.format(_.t('msg_require_password_format'))
                         },
 
-                        errorElement: 'label',
-
-                        rules: {
-
-                            mail: {
-                                required: true,
-                                email: true
-                            },
-
-                            password: {
-                                required: true,
-                                minlength: 6
-                            },
-
-                            password_repeat: {
-                                equalTo: '#password',
-                                minlength: 6
-                            }
-
-                        },
-
-                        messages: {
-                            mail: {
-                                required: _.t('msg_require_mail'),
-                                email:    _.t('msg_require_mail_format')
-                            },
-
-                            password: {
-                                required:  _.t('msg_require_password'),
-                                minlength: $.format(_.t('msg_require_password_format'))
-                            },
-
-                            password_repeat: {
-                                required:  _.t('msg_require_password'),
-                                equalTo:  _.t('msg_not_equal'),
-                                minlength: $.format(_.t('msg_require_password_format'))
-
-                            }
-
-                        }
-
-                    });
-
-                }
+                        password2: _.t('msg_require_password_again')
+                    }
+                });
 
                 // return if is_valid is false
                 if (!form.valid()) {
@@ -363,31 +362,21 @@ define([
                  * ok all is right, now check login data in database
                  */
                 this.loginModel.set({
-                    email:    data.mail,
-                    password: data.password
+                    email:    data.email,
+                    password: data.password,
+                    type:     data.type,
+                    avatar:   data.email
                 });
-
-                if ( $(element.currentTarget).parent().parent().find('form').hasClass('form-register') ) {
-                        this.loginModel.set({
-                            type: 'register'
-                        })
-                    } else {
-                        this.loginModel.set({
-                            type: 'login'
-                        })
-                }
 
                 this.loginProcess();
                 return this;
-
             },
 
             loginProcess: function () {
                 var that = this;
-                _.debug.log('ajaxCall');
+
                 // start login process and handle data
                 this.ajax(this.loginModel.attributes, true, function (return_data) {
-                    _.debug.log(return_data);
                     // remove important data from model attributes
                     that.loginModel.unset('password');
 
@@ -418,14 +407,18 @@ define([
 
                 // refresh global user id
                 _.uid = parseInt(data.message, 10);
-                _.debug.log(data.code);
+
                 if (data.code === '200' || data.code === '201') {
                     if (data.code === '201') {
                         user_type = 'new';
                     }
 
                     this.tmpUserData = data.user_data;
-                    this.tmpUserData.additional = JSON.parse(this.tmpUserData.additional);
+                    this.tmpUserData.additional = $.parseJSON(this.tmpUserData.additional);
+
+                    if (!_.isUndefined(data.avatar.avatars)) {
+                        data.avatar.avatars = $.parseJSON(data.avatar.avatars);
+                    }
 
                     // save user login information into local storage
                     this.loginModel.set({
@@ -438,7 +431,7 @@ define([
                     });
                     this.loginModel.save();
 
-                    this.log('action', 'user_auth_login_successfully', {
+                    this.log('action', 'user_auth_successfully', {
                         auth_uid:      _.uid,
                         auth_uid_temp: _.uid_temp,
                         code:          1002,
@@ -460,7 +453,7 @@ define([
                     this.enableKeypress = false;
                 } else if (data.code === '203') {
                     // wrong password
-                    this.log('action', 'user_auth_login_wrong', {
+                    this.log('action', 'user_auth_wrong', {
                         auth_uid:      _.uid,
                         auth_uid_temp: _.uid_temp,
                         code:          1004,
@@ -470,12 +463,109 @@ define([
                         }
                     });
 
-                    require(['modules/aa_app_mod_notification/js/views/NotificationView'], function (NotificationView) {
-                        NotificationView().init().setOptions({
-                            title:       _.t('msg_login_wrongdata_title'),
-                            description: _.t('msg_login_wrongdata_description'),
-                            type:        'notice'
-                        }).show();
+                    require([
+                        'modules/aa_app_mod_facebook/js/views/FacebookView',
+                        'modules/aa_app_mod_notification/js/views/NotificationView'
+                    ], function (FacebookView, NotificationView) {
+                        var facebook = FacebookView().init();
+
+                        // define notification position in facebook tabs. works also on normal pages
+                        facebook.getScrollPosition(function (position) {
+                            // define notification options
+                            var options = {
+                                title:       _.t('msg_login_wrongdata_title'),
+                                description: _.t('msg_login_wrongdata_description'),
+                                type:        'notice'
+                            };
+
+                            // define notification position
+                            if (position !== false) {
+                                options.before_open = function (pnotify) {
+                                    pnotify.css({
+                                        'top':  position.top,
+                                        'left': 810 - pnotify.width()
+                                    });
+                                };
+                                options.position = '';
+                            }
+
+                            // show notification
+                            NotificationView().init().setOptions(options, true).show();
+                        });
+                    });
+                } else if (data.code === '404') {
+                    // account not exists
+                    require([
+                        'modules/aa_app_mod_facebook/js/views/FacebookView',
+                        'modules/aa_app_mod_notification/js/views/NotificationView'
+                    ], function (FacebookView, NotificationView) {
+                        var facebook = FacebookView().init();
+
+                        // define notification position in facebook tabs. works also on normal pages
+                        facebook.getScrollPosition(function (position) {
+                            // define notification options
+                            var options = {
+                                title:       _.t('msg_login_wrongdata_title'),
+                                description: _.t('msg_login_wrongdata_description'),
+                                type:        'notice'
+                            };
+
+                            // define notification position
+                            if (position !== false) {
+                                options.before_open = function (pnotify) {
+                                    pnotify.css({
+                                        'top':  position.top,
+                                        'left': 810 - pnotify.width()
+                                    });
+                                };
+                                options.position = '';
+                            }
+
+                            // show notification
+                            NotificationView().init().setOptions(options, true).show();
+                        });
+                    });
+                } else if (data.code === '208') {
+                    // wrong password
+                    this.log('action', 'user_auth_allready_exists', {
+                        auth_uid:      _.uid,
+                        auth_uid_temp: _.uid_temp,
+                        code:          1012,
+                        data_obj:      {
+                            code:    data.code,
+                            message: data.message
+                        }
+                    });
+
+                    require([
+                        'modules/aa_app_mod_facebook/js/views/FacebookView',
+                        'modules/aa_app_mod_notification/js/views/NotificationView'
+                    ], function (FacebookView, NotificationView) {
+                        var facebook = FacebookView().init();
+
+                        // define notification position in facebook tabs. works also on normal pages
+                        facebook.getScrollPosition(function (position) {
+                            // define notification options
+                            var options = {
+                                title:       _.t('msg_login_user_exists_title'),
+                                description: _.t('msg_login_user_exists_description'),
+                                type:        'notice'
+                            };
+
+                            // define notification position
+                            if (position !== false) {
+                                options.before_open = function (pnotify) {
+                                    pnotify.css({
+                                        'top':  position.top,
+                                        'left': 810 - pnotify.width()
+                                    });
+                                };
+                                options.position = '';
+                            }
+
+                            // show notification
+                            NotificationView().init().setOptions(options, true).show();
+                        });
                     });
                 } else {
                     // critical other error
@@ -499,7 +589,7 @@ define([
                             code:          1011,
                             data_obj:      {
                                 error_code: '200',
-                                message: 'some went wrong, but I don\'t know what exactly - ' + data.message
+                                message:    'some went wrong, but I don\'t know what exactly - ' + data.message
                             }
                         }
                     });
@@ -511,46 +601,46 @@ define([
                 var nav = $('.navbar-nav'),
                     admins = ',' + _.c('admin_mails').replace(/ /g, '') + ',',
                     uid = this.loginModel.get('uid'),
-                    login_type = this.loginModel.get('login_type');
+                    login_type = this.loginModel.get('login_type'),
+                    avatar;
 
                 // save uid global
                 _.uid = parseInt(uid, 10);
-                if (_.isNumber(uid) && (uid > 0/* || login_type === 'fbuser'*/)) {
-                    nav.find('#nav-login').addClass('hide').end().find('.nav-logout').removeClass('hide');
-                    $('.nav-profile').removeClass('hide').find('img').attr('src', this.loginModel.get('avatar'));
+                if (_.isNumber(uid) && (uid > 0)) {
+                    nav.find('.nav-login').addClass('hide').end().find('.nav-logout').removeClass('hide');
+                    avatar = this.loginModel.get('avatar');
+
+                    $('.nav-profile').removeClass('hide');
+
+                    if (!_.isUndefined(avatar.avatars)) {
+                        $('.nav-profile').find('img').attr('src', avatar.avatars[avatar.selected])
+                    }
 
                     // if admin, show adminpanel button
                     if (admins.indexOf(',' + this.loginModel.get('email') + ',') !== -1) {
-                        nav.find('#nav-admin').removeClass('hide');
+                        $('.nav-admin').removeClass('hide');
                         _.gid = 1;
                         $('.admin-fb-info').hide();
                     }
                 } else {
                     // change status to loged out
-                    nav.find('#nav-login').removeClass('hide').end().find('#nav-admin').addClass('hide').end().find('.nav-logout').addClass('hide');
+                    nav.find('.nav-login').removeClass('hide').end().find('.nav-logout').addClass('hide');
+                    $('.nav-admin').addClass('hide');
                     $('.nav-profile').addClass('hide');
                 }
                 return this;
             },
 
-
-            checkKeyPress: function (event) {
+            checkKeypress: function (event) {
                 var key = event.keyCode || event.which,
                     btn;
                 if (key === 13 && this.enableKeypress === true) {
-                    btn = $('body').find('button#sign-in');
-                    this.mailLogin(btn);
+                    //btn = $('.modal').find('button#sign-in');
+                    //this.mailLogin(btn);
                 }
-            },
-
-            loader: function() {
-                $('body').removeClass('pace-done').addClass('pace-running');
-                $('div.pace-inactive').removeClass('pace-inactive');
-                pace.start();
             }
-
         });
 
         return View;
-    }
+    };
 });

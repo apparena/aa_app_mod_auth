@@ -62,13 +62,7 @@ try
     if ($stmt->rowCount() === 1)
     {
         // get password class
-        $file = ROOT_PATH . DS . 'libs' . DS . 'AppArena' . DS . 'User' . DS . 'class.password.php';
-        if (!file_exists($file))
-        {
-            throw new \Exception('File ' . $file . ' doesn\'t exist in ' . __FILE__);
-        }
-        include_once $file;
-        $pw = new com\apparena\utils\user\password\Password($aa_app_secret);
+        $pw = new \Apparena\Users\Password(APP_SECRET);
 
         // save user data
         $user_id = $stmt->fetchColumn(0);
@@ -110,7 +104,7 @@ try
         }
     }
 }
-catch (Exception $e)
+catch (\Exception $e)
 {
     // prepare return data
     $return['code']    = $e->getCode();
@@ -118,7 +112,7 @@ catch (Exception $e)
     $return['message'] = $e->getMessage();
     $return['trace']   = $e->getTrace();
 }
-catch (PDOException $e)
+catch (\PDOException $e)
 {
     // prepare return data for database errors
     $return['code']    = $e->getCode();

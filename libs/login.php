@@ -24,6 +24,11 @@ try
         throw new \Exception('Login-Type was not sent by request in ' . __FILE__);
     }
 
+    if (empty($_POST['type']) || ($_POST['type'] !== 'register' && $_POST['type'] !== 'login'))
+    {
+        throw new \Exception('Request type was not sent or is wrong, in ' . __FILE__);
+    }
+
     if (empty($_POST['email']))
     {
         throw new \Exception('E-Mail address was not sent by request in ' . __FILE__);
@@ -75,13 +80,7 @@ try
     $stmt->execute();
 
     // get password class
-    $file = ROOT_PATH . DS . 'libs' . DS . 'AppArena' . DS . 'User' . DS . 'class.password.php';
-    if (!file_exists($file))
-    {
-        throw new \Exception('File ' . $file . ' doesn\'t exist in ' . __FILE__);
-    }
-    include_once $file;
-    $pw = new com\apparena\utils\user\password\Password($aa_app_secret);
+    $pw = new \Apparena\Users\Password(APP_SECRET);
 
     // user not exist, create new entry
     if ($stmt->rowCount() === 0 || ($stmt->rowCount() > 0 && $_POST['login_type'] !== 'appuser'))
@@ -128,7 +127,7 @@ try
         $stmt->bindParam(':' . ROW_IP, $token, PDO::PARAM_STR, 60);
         $stmt->bindParam(':' . ROW_IP, $ip);
 
-        $ip = get_client_ip();
+        $ip = $this->request->getIp();
 
         // create password hash
         $pw->encode($password, $email);
@@ -217,10 +216,13 @@ try
             $gp_id = $user[ROW_GP_ID];
         }*/
     }
-    $return['avatar'] = 'https://secure.gravatar.com/avatar/' . md5(strtolower($email)) . '?s=112&d=mm';
+    $return['avatar'] = 'https://secure.gravatar.com/avatar/' . md5(strtolower($email)) . '?s=40&d=mm';
 
+
+    // this part is only for social media connections
     if ($_POST['login_type'] === 'fbuser' && !empty($_POST['avatar']))
     {
+        //$return['avatar'] = 'http://graph.facebook.com/' . $fb_id . '/picture?width=40&height=40';
         $return['avatar'] = $_POST['avatar'];
     }
     if ($_POST['login_type'] === 'twuser' && !empty($_POST['avatar']))
@@ -234,18 +236,7 @@ try
 
     if ($return['status'] === 'success')
     {
-        // safe admin status
-        /*$session                 = array();
-        $session['gid']          = 'user';
-        $session['user']['mail'] = $email;
-        $admins                  = ',' . __c('admin_mails') . ',';
-        if (strpos($admins, $email) !== false)
-        {
-            $session['gid'] = 'admin';
-        }
-        $return['user_type']    = $session['gid'];*/
         $return['user_type'] = 'user';
-        //$_SESSION['login'] = $session;
     }
 
     if (!defined('ENV_MODE') || ENV_MODE !== 'dev')

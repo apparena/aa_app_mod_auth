@@ -1,13 +1,13 @@
 <% } if(_.c('login_social_networks').indexOf('fb') !== -1){ %>
-    <button class="btn btn-block btn-lg btn-facebook fbconnect text-center">
-        <i class="fa fa-facebook fa-lg"></i><span> <%= _.t('register') %> <%= _.t('facebook') %></span>
-    </button>
+<button class="btn btn-block btn-lg btn-facebook fbconnect text-center">
+    <i class="fa fa-facebook fa-lg"></i><span> <%= _.t('register_with') %> <%= _.t('facebook') %></span>
+</button>
 <% } if(_.c('login_social_networks').indexOf('twitter') !== -1){ %>
-    <button class="btn btn-block btn-lg btn-twitter twconnect text-center">
-        <i class="fa fa-twitter fa-lg"></i><span> <%= _.t('register') %>  <%= _.t('twitter') %></span>
-    </button>
+<button class="btn btn-block btn-lg btn-twitter twconnect text-center">
+    <i class="fa fa-twitter fa-lg"></i><span> <%= _.t('register_with') %> <%= _.t('twitter') %></span>
+</button>
 <% if(_.c('login_social_networks').indexOf('gplus') !== -1){%>
-    <button class="btn btn-block btn-lg btn-google gpconnect text-center">
-        <i class="fa fa-google-plus fa-lg"></i><span> <%= _.t('register') %>  <%= _.t('gplus') %></span>
-    </button>
+<button class="btn btn-block btn-lg btn-google gpconnect text-center">
+    <i class="fa fa-google-plus fa-lg"></i><span> <%= _.t('register_with') %> <%= _.t('gplus') %></span>
+</button>
 <% } %>

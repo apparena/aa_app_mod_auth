@@ -4,15 +4,16 @@ define([
     'underscore',
     'backbone',
     'modules/aa_app_mod_auth/js/models/UserDataModel',
-    'modules/aa_app_mod_auth/js/models/LoginModel'
-], function (View, $, _, Backbone, UserDataModel, LoginModel) {
+    'jquery.validator_config',
+    'jquery.serialize_object',
+    'jMD5'
+], function (View, $, _, Backbone, UserDataModel) {
     'use strict';
 
     return function () {
         View.namespace = 'authParticipation';
 
         View.code = Backbone.View.extend({
-
             tagName: 'div',
 
             className: 'participate-container',
@@ -35,7 +36,7 @@ define([
 
             mergeUserdata: function (attributes) {
                 var that = this,
-                    login_type = that.model.get('login_type');
+                    login_type = this.model.get('login_type');
                 _.each(attributes, function (value, key) {
                     //_.debug.log(key, value, that.user_data_model.has(key), that.user_data_model.has(value));
                     if (!that.user_data_model.has(key) || _.isEmpty(that.user_data_model.get(key))) {
@@ -44,7 +45,8 @@ define([
                         }
                         //_.debug.warn('add', key, value);
                         that.user_data_model.set(key, value);
-                    }/* else {
+                    }
+                    /* else {
                      _.debug.info(key + ' exist:', that.user_data_model.get(key), value);
                      }*/
                     return true;
@@ -91,7 +93,7 @@ define([
                 };
 
                 // check login status
-                if (this.model.get('uid') === '0') {
+                if (_.isUndefined(this.model) || this.model.get('uid') === '0') {
                     this.goTo('');
                 }
 
@@ -112,7 +114,9 @@ define([
                         // store social model login data to login model if not exist
                         if (that.model.get('login_type') === 'fbuser') {
                             // FACEBOOK USER
-                            require(['modules/aa_app_mod_facebook/js/models/LoginModel'], function (FacebookLoginModel) {
+                            require([
+                                'modules/aa_app_mod_facebook/js/models/LoginModel'
+                            ], function (FacebookLoginModel) {
                                 that.mergeUserdata(FacebookLoginModel().init().attributes);
                                 // unset some not needed data
                                 that.user_data_model.unset('fbid')
@@ -150,7 +154,7 @@ define([
 
                     });
                 } else {
-                    _.debug.log('NO updateFromDatabase');
+                    //_.debug.log('NO updateFromDatabase');
                     this.checkUserdata();
                 }
 
@@ -173,10 +177,8 @@ define([
                     return false;
                 }
 
-                //_.debug.info(this.allUserDataStored(), this.model.get('login_type'));
-
                 this.goTo('call/auth-userdata');
-                this.defineRequirements();
+                this.defineRequirements().defineTemplateInformation();
                 return this;
             },
 
@@ -190,8 +192,7 @@ define([
                     address:  false,
                     field1:   false,
                     field2:   false,
-                    field3:   false,
-                    nickname: false
+                    field3:   false
                 };
 
                 if (required_selection.indexOf('name') !== -1) {
@@ -212,21 +213,18 @@ define([
                 if (required_selection.indexOf('field3') !== -1) {
                     this.required.field3 = true;
                 }
-                if (required_selection.indexOf('nickname') !== -1) {
-                    this.required.name = true;
-                }
-                this.defineTemplateInformation();
                 return this;
             },
 
             defineTemplateInformation: function () {
-                this.loginModel = LoginModel().init();
-                this.loginModel.fetch();
-                var email = this.loginModel.get('email');
+                var email = this.user_data_model.get('email'),
+                    login_type = this.model.get('login_type');
 
-                /*if (this.model.get('login_type') === 'twuser' || this.model.get('login_type') === 'gpuser') {
-                 email = '';
-                 }*/
+                if (_.isEmpty(email) && (login_type === 'appuser' || login_type === 'fbuser')) {
+                    email = this.model.get('email');
+                } else if (login_type === 'twuser' || login_type === 'gpuser') {
+                    email = '';
+                }
 
                 this.userTemplatedata = {
                     'required':  this.required,
@@ -241,14 +239,22 @@ define([
                 return this;
             },
 
-            submit: function () {
+            submit: function (elem) {
                 var that = this,
-                    form = this.$('#form-participate'),
+                    btn = $(elem.currentTarget),
+                    form = btn.closest('form'),
                     data = (form) ? form.serializeObject() : {},
-                    user_data;
+                    user_data, avatar, email;
+
+                // add date validation method
+                $.validator.addMethod('germanDate', function (value, element) {
+                        // put your own logic here, this is just a (crappy) example
+                        return value.match(/^\d\d?\.\d\d?\.\d\d\d\d$/);
+                    }, 'Please enter a date in the format dd.mm.yyyy.'
+                );
 
                 form.validate({
-                    debug: true,
+                    //debug: true,
                     rules: {
                         email:     {
                             required: true,
@@ -260,11 +266,9 @@ define([
                         lastname:  {
                             required: this.required.name
                         },
-                        nickname:  {
-                            required: this.required.nickname
-                        },
                         birthday:  {
-                            required: this.required.birthday
+                            required:   this.required.birthday,
+                            germanDate: true
                         },
                         street:    {
                             required: this.required.address
@@ -286,9 +290,6 @@ define([
                         },
                         terms:     {
                             required: true
-                        },
-                        gender: {
-                            required: this.required.gender
                         }
                     },
 
@@ -299,7 +300,6 @@ define([
                         },
                         firstname: _.t('msg_require_firstname'),
                         lastname:  _.t('msg_require_lastname'),
-                        nickname:  _.t('msg_require_nickname'),
                         birthday:  _.t('msg_require_birthday'),
                         street:    _.t('msg_require_street'),
                         zip:       _.t('msg_require_zip'),
@@ -325,13 +325,12 @@ define([
 
                 // implement data into model
                 this.user_data_model.set(data);
-                console.log(data);
-                console.log(this.user_data_model);
                 this.user_data_model.save();
 
                 // save userdate to database
                 user_data = this.user_data_model.attributes;
                 //user_data.email = this.model.get('email');
+                email = data.email;
                 user_data.auth_uid = this.model.get('uid');
                 data = {
                     user_data: user_data,
@@ -349,6 +348,12 @@ define([
                     }
                 });
 
+                // update avatar information
+                avatar = this.model.get('avatar');
+                avatar.avatars.gravatar = 'https://secure.gravatar.com/avatar/' + $.md5(email) + '?d=mm';
+                this.model.set('avatar', avatar);
+                this.model.save();
+
                 // send opt-in mail if newsletter was accepted
                 require(['modules/aa_app_mod_optivo/js/views/OptivoView'], function (OptivoView) {
                     var optivo = OptivoView().init();
@@ -362,7 +367,7 @@ define([
                     }
 
                     // send welcome mail if activated
-                    if (_.c('mail_activated') === '1' && that.model.get('user_type') === 'new') {
+                    if ((_.c('mail_activated').toString() === '1' || _.c('mail_activated') === 'y') && that.model.get('user_type') === 'new') {
                         optivo.sendTransactionMail({
                             'recipient': user_data.email,
                             'mailtype':  'welcome'
@@ -387,7 +392,7 @@ define([
             checkKeypress: function (event) {
                 var key = event.keyCode || event.which;
                 if (key === 13 && this.enableKeypress === true) {
-                    this.submit();
+                    //this.submit();
                 }
             },
 
@@ -434,5 +439,5 @@ define([
         });
 
         return View;
-    }
+    };
 });

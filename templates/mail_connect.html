@@ -1,24 +1,41 @@
-        <form id="form-login" class="no-margin" onsubmit="return false;">
-           <fieldset>
-            <div class="form-group no-margin">
-                <label for="mail"><%= _.t('email') %></label>
+<form class="no-margin form-auth">
+    <fieldset>
+        <input id="type" name="type" type="hidden" value="login">
 
-                <div class="input-group input-group-lg">
-                    <span class="input-group-addon">
-                        <i class="eicon-user"></i>
-                    </span>
-                    <input type="email" name="mail" id="mail" class="form-control input-lg" placeholder="<%= _.t('ph_email') %>" value="" required autocomplete="on"/>
-                </div>
+        <div class="form-group no-margin">
+            <label for="email"><%= _.t('email') %></label>
+
+            <div class="input-group input-group-lg">
+                <span class="input-group-addon">
+                    <i class="eicon-user"></i>
+                </span>
+                <input id="email" name="email" type="email" class="form-control input-lg" placeholder="<%= _.t('ph_email') %>" autocomplete="off" required>
             </div>
-            <div class="form-group no-margin">
-                <label for="password"><%= _.t('password') %></label>
 
-                <div class="input-group input-group-lg">
-                    <span class="input-group-addon">
+        </div>
+
+        <div class="form-group">
+            <label for="password"><%= _.t('password') %></label>
+
+            <div class="input-group input-group-lg">
+                <span class="input-group-addon">
                     <i class="fa fa-lock"></i>
-                    </span>
-                    <input type="password" name="password" id="password" class="form-control input-lg" placeholder="<%= _.t('ph_password') %>" value="" required />
-                </div>
+                </span>
+                <input id="password" name="password" type="password" class="form-control input-lg" placeholder="<%= _.t('ph_password') %>" autocomplete="off" required>
             </div>
-           </fieldset>
 
+        </div>
+    </fieldset>
+
+    <button type="button" id="sign-in" class="btn btn-block btn-lg btn-danger">
+        <span class="small-circle"><i class="fa fa-caret-right"></i></span>
+        <small><%= _.t('sign_in_by_mail') %></small>
+    </button>
+    <div class="forgot"><a class="forgot" href="#/mod/auth/password"><%= _.t('password_lost') %></a></div>
+
+    <div class="create">
+        <a class="login_link" href="#create" data-toggle="tab">
+            <%= _.t('login_register_teaser') %>
+        </a>
+    </div>
+</form>

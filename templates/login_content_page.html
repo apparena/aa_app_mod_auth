@@ -1,58 +1,47 @@
-<div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 col-xs-10 col-xs-offset-1">
-    <section class="widget widget-tabs">
-        <header>
-            <ul id="login-tabs" class="nav nav-tabs">
-                <li id="tab_register" class="register_link_tab">
-                    <a data-toggle="tab"><%= _.t('register_tab') %></a>
-                </li>
-                <li id="tab_login" class="active login_link_tab">
-                    <a data-toggle="tab"><%= _.t('login_tab') %></a>
-                </li>
-            </ul>
-        </header>
-        <div class="body tab-content">
-            <div class="tab-pane">
-                <section class="widget login-widget register-tab">
-                    <br />
-                    <div>
-                        <% _.each (buttons, function(value, key) { if(_.isUndefined(value.data)) { value.data = ''; }
+<div class="content container">
+    <div class="col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 col-xs-12">
+        <section class="widget widget-tabs">
 
-                        if(value.btn_type === 'button') { %>
-                        <button type="<%- value.btn_type %>" class="btn <%- value.btn_class %>" id="<%- value.btn_id %>" <%= value.data %> >
-                        <span class="small-circle"><i class="fa fa-caret-right"></i></span>
-                        <small><%= value.btn_text_register %></small>
-                        </button>
-                        <% } });
-                        %>
-                    </div>
-                    <br />
-                    <a class="login_link login_link_tab" href="#page/aa_app_mod_auth"><strong><%= _.t('allready_in') %></strong> <%= _.t('login_here') %></a>
+            <% if(typeof headline !== 'undefined' && _.isEmpty(headline) === false) { %>
+            <h3><%= headline %></h3>
+            <% } %>
 
-                    </form>
-                </section>
+            <header>
+                <ul class="nav nav-tabs">
+                    <li class="active">
+                        <a href="#create" data-toggle="tab"><%= _.t('register') %></a>
+                    </li>
+                    <li>
+                        <a href="#login" data-toggle="tab"><%= _.t('login') %></a>
+                    </li>
+                </ul>
+            </header>
+
+            <div class="body tab-content">
+                <div id="login" class="tab-pane">
+                    <section class="widget login-widget login-tab">
+                        <header class="text-align-center">
+                            <h4><%= _.t('login_headline') %></h4>
+                        </header>
+
+                        <div class="login-body">
+                            <!-- PUT YOU CONTENT HERE WITH JS -->
+                        </div>
+                    </section>
+                </div>
+                <div id="create" class="tab-pane active">
+                    <section class="widget login-widget login-tab">
+                        <header class="text-align-center">
+                            <h4><%= _.t('create_account_headline') %></h4>
+                        </header>
+
+                        <div class="register-body">
+                            <!-- PUT YOU CONTENT HERE WITH JS -->
+                        </div>
+                    </section>
+                </div>
             </div>
-            <div class="tab-pane active clearfix">
-                <section class="widget login-widget login-tab">
-                    <br />
-                    <div>
 
-                        <% _.each (buttons, function(value, key) { if(_.isUndefined(value.data)) { value.data = ''; }
-                        if(value.btn_type === 'button') { %>
-                            <button type="<%- value.btn_type %>" class="btn <%- value.btn_class %>" id="<%- value.btn_id %>" <%= value.data %> >
-                            <span class="small-circle"><i class="fa fa-caret-right"></i></span>
-                            <small><%= value.btn_text_login %></small>
-                            </button>
-                        <% } }); %>
-                    </div>
-                    <div class="forgot"><a class="forgot" href="#/page/aa_app_mod_auth/password"><%= _.t('forgotten_user_or_pw') %></a></div>
-                    <br />
-                    <a class="login_link register_link_tab" href="#page/aa_app_mod_auth"><strong><%= _.t('not_in') %></strong> <%= _.t('register_here') %></a>
-
-                    </form>
-                </section>
-            </div>
-        </div>
-    </section>
-</div>
-</section>
+        </section>
+    </div>
 </div>

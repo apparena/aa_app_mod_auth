@@ -5,10 +5,11 @@ define([
     'use strict';
 
     return function () {
-        LoginView().init();
         // handle only the navigation on first app call
         LoginView().init().handleNavigation();
         //loginView.goTo('', false);
-        _.router.navigate('', {trigger: true});
+        _.router.goToPreviewsPage(false);
+        // remove object
+        LoginView().remove();
     };
 });

@@ -10,7 +10,7 @@ define([
         Model.namespace = 'authUserData';
 
         Model.code = Backbone.Model.extend({
-            localStorage: new Backbone.LocalStorage('AppArenaTippspielApp_' + _.aa.instance.i_id + '_UserData'),
+            localStorage: new Backbone.LocalStorage('aa_app_mod_auth_' + _.aa.instance.i_id + '_UserData'),
 
             updateFromDatabase: true,
 
@@ -40,10 +40,9 @@ define([
                 this.fetch();
             },
 
-            disableUpdateFromDatabase: function(){
+            disableUpdateFromDatabase: function () {
                 this.updateFromDatabase = false;
             }
-
         });
 
         return Model;
