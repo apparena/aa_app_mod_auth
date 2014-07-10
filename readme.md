@@ -1,9 +1,7 @@
 # App-Arena.com App Module: Auth
-**Github:** https://github.com/apparena/aa_app_mod_auth
-
-**Docs:** http://www.app-arena.com/docs/display/developer
-
-This is a module of the [aa_app_template](https://github.com/apparena/aa_app_template)
+* **Github:** https://github.com/apparena/aa_app_mod_auth
+* **Docs:** http://www.app-arena.com/docs/display/developer
+* This is a module of the [aa_app_template](https://github.com/apparena/aa_app_template)
 
 **Required Template-Version:** >= 1.3.0
 
@@ -139,7 +137,7 @@ modules/aa_app_mod_auth/js/views/PasswordGetNewView
 
 #### App-Manager locale values
 | locale | value example |
-|--------|--------|--------|
+|--------|--------|
 | login_headline | Sign up |
 | msg_require_mail | An E-Mail address is required. |
 | msg_require_mail_format | The E-Mail needs to be in the format of name@domain.co.uk |
